@@ -68,7 +68,9 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
 
   // Check if the subtype is laceration or cut wound to show wound dimensions
   useEffect(() => {
-    setShowWoundDimensions(caseSubtype === "撕裂傷" || caseSubtype === "割傷");
+    const shouldShow = caseSubtype === "撕裂傷" || caseSubtype === "割傷";
+    console.log('Case subtype:', caseSubtype, 'Should show wound dimensions:', shouldShow);
+    setShowWoundDimensions(shouldShow);
   }, [caseSubtype]);
 
   const handleSubmit = () => {
@@ -259,7 +261,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
           </div>
 
           {/* Submit Button */}
-          <div className="mt-6 flex justify-between">
+          <div className="mt-6 flex flex-wrap gap-4 justify-end">
             {/* Export Button (Admin only) */}
             {user?.role === "admin" && (
               <button
@@ -282,7 +284,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
                 handleSubmit();
               }}
               disabled={!caseType || isPending}
-              className="px-4 py-2 rounded-md text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 rounded-md text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? (
                 <>
