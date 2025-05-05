@@ -1,20 +1,19 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -39,6 +38,8 @@ const registerSchema = z.object({
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("login");
 
   // Redirect if already logged in
   useEffect(() => {
@@ -46,6 +47,18 @@ export default function AuthPage() {
       setLocation("/");
     }
   }, [user, setLocation]);
+  
+  // Effect to handle successful registration
+  useEffect(() => {
+    if (registerMutation.isSuccess) {
+      toast({
+        title: "註冊成功",
+        description: "請使用新帳號登入系統",
+        variant: "default",
+      });
+      setActiveTab("login");
+    }
+  }, [registerMutation.isSuccess, toast]);
 
   // Login form
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -56,19 +69,13 @@ export default function AuthPage() {
     },
   });
 
-  // Add role field to register schema
-  const registerSchemaWithRole = registerSchema.extend({
-    isAdmin: z.boolean().default(false),
-  });
-
   // Register form
-  const registerForm = useForm<z.infer<typeof registerSchemaWithRole>>({
-    resolver: zodResolver(registerSchemaWithRole),
+  const registerForm = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
       password: "",
       name: "",
-      isAdmin: false,
     },
   });
 
@@ -78,12 +85,12 @@ export default function AuthPage() {
   };
 
   // Handle register form submission
-  const onRegisterSubmit = (data: z.infer<typeof registerSchemaWithRole>) => {
+  const onRegisterSubmit = (data: z.infer<typeof registerSchema>) => {
     registerMutation.mutate({
       username: data.username,
       password: data.password,
       name: data.name,
-      role: data.isAdmin ? "admin" : "volunteer",
+      role: "volunteer",
     });
   };
 
@@ -228,28 +235,7 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={registerForm.control}
-                      name="isAdmin"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              註冊為管理員
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              管理員擁有匯出資料和其他進階功能的權限
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
+
                     <Button
                       type="submit"
                       className="w-full"
