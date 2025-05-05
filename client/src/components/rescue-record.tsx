@@ -1,0 +1,203 @@
+import { useState } from "react";
+import { Rescue } from "@shared/schema";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { AmbulanceIcon, ExpandIcon, MedicalIcon, SaveIcon } from "./ui/icons";
+import { cn } from "@/lib/utils";
+
+interface RescueRecordProps {
+  onSubmit: (data: Partial<Rescue>) => void;
+  isPending: boolean;
+}
+
+export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [caseType, setCaseType] = useState<string | undefined>();
+  const [caseSubtype, setCaseSubtype] = useState<string | undefined>();
+  const [treatment, setTreatment] = useState("");
+
+  const getSubtypes = (type: string) => {
+    switch (type) {
+      case "內科":
+        return ["急病", "OHCA", "overdose", "意識不清"];
+      case "外科":
+        return ["車禍", "路倒"];
+      case "其他":
+        return ["精神急病", "自殺", "災害救助"];
+      case "火警救助":
+        return ["受困", "燒燙傷", "嗆傷"];
+      case "緊急救援":
+        return ["山域", "水域", "交通事故"];
+      case "打架受傷":
+        return ["挫傷", "割傷", "撕裂傷"];
+      default:
+        return [];
+    }
+  };
+
+  const quickTags = [
+    "生理監視 VS",
+    "心理支持 MS",
+    "現場待命",
+    "撕裂傷 LW",
+    "擦傷 AW",
+  ];
+
+  const insertText = (text: string) => {
+    const prefix = treatment.length > 0 && !treatment.endsWith("\n") ? "\n" : "";
+    setTreatment(treatment + prefix + text);
+  };
+
+  const handleSubmit = () => {
+    if (!caseType) return;
+
+    onSubmit({
+      caseType,
+      caseSubtype,
+      treatment,
+    });
+
+    // Reset form
+    setCaseType(undefined);
+    setCaseSubtype(undefined);
+    setTreatment("");
+  };
+
+  return (
+    <Card className="mb-6">
+      <CardHeader className="px-5 py-4 border-b border-neutral-200 cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <AmbulanceIcon className="text-red-500" />
+            救護記錄
+          </CardTitle>
+          <ExpandIcon 
+            className={cn("text-neutral-500 transition-transform", 
+              isOpen ? "rotate-180" : "")} 
+          />
+        </div>
+      </CardHeader>
+
+      <CardContent 
+        className={cn(
+          "px-5 transition-all duration-300 overflow-hidden", 
+          isOpen ? "max-h-[1000px] py-4" : "max-h-0 py-0"
+        )}
+      >
+        <div className="py-4 border-t border-neutral-100">
+          {/* Case Type Selection */}
+          <div className="mb-4">
+            <Label htmlFor="caseType" className="block text-sm font-medium text-neutral-700 mb-2">
+              案件類型：
+            </Label>
+            <Select value={caseType} onValueChange={(value) => {
+              setCaseType(value);
+              setCaseSubtype(undefined);
+            }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="請選擇" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="內科">內科</SelectItem>
+                <SelectItem value="外科">外科</SelectItem>
+                <SelectItem value="火警救助">火警救助</SelectItem>
+                <SelectItem value="其他">其他</SelectItem>
+                <SelectItem value="緊急救援">緊急救援</SelectItem>
+                <SelectItem value="打架受傷">打架受傷</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Subtype Selection */}
+          {caseType && (
+            <div className="mb-4">
+              <Label className="block text-sm font-medium text-neutral-700 mb-2">
+                子類型：
+              </Label>
+              <RadioGroup 
+                className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm"
+                value={caseSubtype}
+                onValueChange={setCaseSubtype}
+              >
+                {getSubtypes(caseType).map((subtype) => (
+                  <div key={subtype} className="flex items-center space-x-2 p-2 border border-neutral-200 rounded bg-white">
+                    <RadioGroupItem value={subtype} id={subtype} />
+                    <Label htmlFor={subtype}>{subtype}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          )}
+
+          {/* Basic Treatment */}
+          <div className="mb-4">
+            <h4 className="flex items-center gap-1 font-medium mb-2">
+              <MedicalIcon className="text-neutral-600" />
+              基本處置
+            </h4>
+            <Textarea
+              id="treatmentNotes"
+              placeholder="請描述現場處置內容..."
+              className="min-h-[120px] resize-y"
+              value={treatment}
+              onChange={(e) => setTreatment(e.target.value)}
+            />
+          </div>
+
+          {/* Quick Tags */}
+          <div className="mb-4">
+            <Label className="block text-sm font-medium text-neutral-500 mb-2">
+              快速標籤：
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {quickTags.map((tag) => (
+                <Button
+                  key={tag}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700"
+                  onClick={() => insertText(tag)}
+                >
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={handleSubmit}
+              disabled={!caseType || isPending}
+              className="bg-primary-500 hover:bg-primary-600 text-white font-medium"
+            >
+              {isPending ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  處理中...
+                </>
+              ) : (
+                <>
+                  <SaveIcon className="mr-2 h-4 w-4" />
+                  儲存救護記錄
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
