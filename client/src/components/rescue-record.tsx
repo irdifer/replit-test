@@ -39,7 +39,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
       case "內科":
         return ["急病", "OHCA", "overdose", "意識不清"];
       case "外科":
-        return ["車禍", "路倒"];
+        return ["車禍", "路倒", "割傷", "撕裂傷"];
       case "其他":
         return ["精神急病", "自殺", "災害救助"];
       case "火警救助":
@@ -261,43 +261,45 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
           </div>
 
           {/* Submit Button */}
-          <div className="mt-6 flex flex-wrap gap-4 justify-end">
-            {/* Export Button (Admin only) */}
-            {user?.role === "admin" && (
+          <div className="mt-6 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-4">
+              {/* Export Button (Admin only) */}
+              {user?.role === "admin" && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleExport();
+                  }}
+                  className="px-4 py-2 rounded-md text-sm font-medium text-blue-600 border border-blue-300 hover:bg-blue-50"
+                >
+                  <FileDown className="mr-2 h-4 w-4 inline-block" />
+                  導出 Excel
+                </button>
+              )}
+              
               <button
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleExport();
+                  handleSubmit();
                 }}
-                className="px-4 py-2 rounded-md text-sm font-medium text-blue-600 border border-blue-300 hover:bg-blue-50"
+                disabled={!caseType || isPending}
+                className="px-6 py-3 rounded-md text-base font-medium bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FileDown className="mr-2 h-4 w-4 inline-block" />
-                導出 Excel
+                {isPending ? (
+                  <>
+                    <span className="inline-block animate-spin mr-2">⏳</span>
+                    處理中...
+                  </>
+                ) : (
+                  <>
+                    <SaveIcon className="inline-block mr-2 h-4 w-4" />
+                    儲存救護記錄
+                  </>
+                )}
               </button>
-            )}
-            
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-              disabled={!caseType || isPending}
-              className="px-4 py-2 rounded-md text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isPending ? (
-                <>
-                  <span className="inline-block animate-spin mr-2">⏳</span>
-                  處理中...
-                </>
-              ) : (
-                <>
-                  <SaveIcon className="inline-block mr-2 h-4 w-4" />
-                  儲存救護記錄
-                </>
-              )}
-            </button>
+            </div>
           </div>
         </div>
       </CardContent>
