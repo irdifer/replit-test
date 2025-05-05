@@ -95,7 +95,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col md:flex-row gap-0 overflow-hidden">
+    <div className="auth-page h-screen flex flex-col md:flex-row gap-0">
       {/* Hero Section */}
       <div className="bg-primary-500 text-white px-6 pt-3 pb-5 md:p-8 flex-[0.14] flex flex-col justify-center md:justify-center items-center">
         <div className="max-w-md text-center">
