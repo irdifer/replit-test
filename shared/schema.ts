@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -58,6 +59,26 @@ export const insertRescueSchema = createInsertSchema(rescues).pick({
   woundHeight: true,
   woundDepth: true,
 });
+
+// Define relations
+export const usersRelations = relations(users, ({ many }) => ({
+  activities: many(activities),
+  rescues: many(rescues),
+}));
+
+export const activitiesRelations = relations(activities, ({ one }) => ({
+  user: one(users, {
+    fields: [activities.userId],
+    references: [users.id],
+  }),
+}));
+
+export const rescuesRelations = relations(rescues, ({ one }) => ({
+  user: one(users, {
+    fields: [rescues.userId],
+    references: [users.id],
+  }),
+}));
 
 // Types
 export type User = typeof users.$inferSelect;
