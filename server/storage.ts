@@ -1,13 +1,14 @@
 import { users, type User, type InsertUser, activities, type Activity, type InsertActivity, rescues, type Rescue, type InsertRescue, type DailyActivity, type Stats } from "@shared/schema";
-import * as session from "express-session";
+import session from "express-session";
 import createMemoryStore from "memorystore";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { db } from "./db";
-import { eq, and, gte, lte } from "drizzle-orm";
-import connectPg from "connect-pg-simple";
+import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
+import * as connectPgModule from "connect-pg-simple";
 import { pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
+const connectPg = connectPgModule.default;
 const PostgresSessionStore = connectPg(session);
 
 // modify the interface with any CRUD methods
@@ -30,11 +31,11 @@ export interface IStorage {
   getUserStats(userId: number): Promise<Stats>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any; // session.Store;
 }
 
 export class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: any; // session.Store;
 
   constructor() {
     this.sessionStore = new PostgresSessionStore({ 
@@ -116,14 +117,14 @@ export class DatabaseStorage implements IStorage {
     const userActivities = await db.select()
       .from(activities)
       .where(eq(activities.userId, userId))
-      .orderBy(activities.timestamp, 'desc')
+      .orderBy(desc(activities.timestamp))
       .limit(10);
     
     // Get the user's rescues
     const userRescues = await db.select()
       .from(rescues)
       .where(eq(rescues.userId, userId))
-      .orderBy(rescues.timestamp, 'desc')
+      .orderBy(desc(rescues.timestamp))
       .limit(5);
     
     // Convert rescues to activities for display
@@ -214,7 +215,7 @@ export class DatabaseStorage implements IStorage {
     workHours = Math.round(workHours * 10) / 10;
     
     // Count rescue cases
-    const rescueCount = await db.select({ count: db.fn.count() })
+    const rescueCount = await db.select({ count: sql`count(*)` })
       .from(rescues)
       .where(
         and(
