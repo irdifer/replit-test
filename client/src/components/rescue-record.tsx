@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AmbulanceIcon, ExpandIcon, MedicalIcon, SaveIcon } from "./ui/icons";
+import { AmbulanceIcon, ClockIcon, ExpandIcon, MedicalIcon, SaveIcon } from "./ui/icons";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { FileDown } from "lucide-react";
@@ -33,6 +33,8 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
   const [woundLength, setWoundLength] = useState("");
   const [woundHeight, setWoundHeight] = useState("");
   const [woundDepth, setWoundDepth] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   // Case type mapping for subtypes
   const caseTypeMap = {
@@ -71,6 +73,8 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
       caseType,
       caseSubtype,
       treatment,
+      startTime,
+      endTime,
     };
 
     // Add wound dimensions if it's a laceration wound
@@ -89,6 +93,8 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
     setWoundLength("");
     setWoundHeight("");
     setWoundDepth("");
+    setStartTime("");
+    setEndTime("");
   };
 
   // Function to export data to Excel (for admin users)
@@ -216,6 +222,40 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
               </div>
             </div>
           )}
+          
+          {/* Mission Time Selection */}
+          <div className="mb-4 p-3 border border-gray-200 bg-gray-50 rounded-md">
+            <h4 className="flex items-center gap-1 font-medium mb-3 text-gray-700">
+              <ClockIcon className="text-gray-600" />
+              出勤時間記錄
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="startTime" className="block text-sm font-medium text-neutral-700 mb-1">
+                  出勤時間
+                </Label>
+                <Input
+                  id="startTime"
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <Label htmlFor="endTime" className="block text-sm font-medium text-neutral-700 mb-1">
+                  返隊時間
+                </Label>
+                <Input
+                  id="endTime"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
           
           {/* Basic Treatment */}
           <div className="mb-4">
