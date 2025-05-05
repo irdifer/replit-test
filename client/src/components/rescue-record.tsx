@@ -34,23 +34,14 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
   const [woundHeight, setWoundHeight] = useState("");
   const [woundDepth, setWoundDepth] = useState("");
 
-  const getSubtypes = (type: string) => {
-    switch (type) {
-      case "內科":
-        return ["急病", "OHCA", "overdose", "意識不清"];
-      case "外科":
-        return ["車禍", "路倒", "割傷", "撕裂傷"];
-      case "其他":
-        return ["精神急病", "自殺", "災害救助"];
-      case "火警救助":
-        return ["受困", "燒燙傷", "嗆傷"];
-      case "緊急救援":
-        return ["山域", "水域"];
-      case "打架受傷":
-        return ["挫傷", "割傷", "撕裂傷"];
-      default:
-        return [];
-    }
+  // Case type mapping for subtypes
+  const caseTypeMap = {
+    內科: ["急病", "OHCA", "overdose", "意識不清"],
+    外科: ["車禍", "路倒", "割傷", "撕裂傷"],
+    其他: ["精神急病", "自殺", "災害救助"],
+    火警救助: ["受困", "燒燙傷", "嗆傷"],
+    緊急救援: ["山域", "水域"],
+    打架受傷: ["挫傷", "割傷", "撕裂傷"],
   };
 
   const quickTags = [
@@ -160,18 +151,21 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
               <Label className="block text-sm font-medium text-neutral-700 mb-2">
                 子類型：
               </Label>
-              <RadioGroup 
-                className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm"
-                value={caseSubtype}
-                onValueChange={setCaseSubtype}
-              >
-                {getSubtypes(caseType).map((subtype) => (
-                  <div key={subtype} className="flex items-center space-x-2 p-2 border border-neutral-200 rounded bg-white">
-                    <RadioGroupItem value={subtype} id={subtype} />
-                    <Label htmlFor={subtype}>{subtype}</Label>
-                  </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                {caseTypeMap[caseType as keyof typeof caseTypeMap]?.map((subtype: string) => (
+                  <button
+                    key={subtype}
+                    type="button"
+                    className={`px-3 py-2 rounded text-sm w-full ${caseSubtype === subtype ? "bg-blue-100 border-blue-300 text-blue-800" : "bg-white border-neutral-200 hover:bg-gray-50"} border`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCaseSubtype(subtype);
+                    }}
+                  >
+                    {subtype}
+                  </button>
                 ))}
-              </RadioGroup>
+              </div>
             </div>
           )}
 
