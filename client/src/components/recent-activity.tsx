@@ -1,13 +1,17 @@
+import { useState } from "react";
 import { Activity } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HistoryIcon, ClockIcon, AmbulanceIcon, TrainingIcon, DutyIcon } from "./ui/icons";
+import { HistoryIcon, ClockIcon, AmbulanceIcon, TrainingIcon, DutyIcon, ExpandIcon } from "./ui/icons";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface RecentActivityProps {
   activities: Activity[];
 }
 
 export default function RecentActivity({ activities }: RecentActivityProps) {
+  const [isOpen, setIsOpen] = useState(true);
+  
   // Helper function to get icon based on activity type
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -64,14 +68,28 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
 
   return (
     <Card className="mb-6">
-      <CardHeader className="px-5 py-4 border-b border-neutral-200">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <HistoryIcon className="text-blue-500" />
-          活動記錄
-        </CardTitle>
+      <CardHeader 
+        className="px-5 py-4 border-b border-neutral-200 cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <HistoryIcon className="text-blue-500" />
+            活動記錄
+          </CardTitle>
+          <ExpandIcon 
+            className={cn("text-neutral-500 transition-transform", 
+              isOpen ? "rotate-180" : "")} 
+          />
+        </div>
       </CardHeader>
       
-      <CardContent className="p-0">
+      <CardContent 
+        className={cn(
+          "p-0 transition-all duration-300 overflow-hidden", 
+          isOpen ? "max-h-[1000px]" : "max-h-0"
+        )}
+      >
         <div className="divide-y divide-neutral-100">
           {activities.length === 0 ? (
             <div className="p-8 text-center text-neutral-500">
