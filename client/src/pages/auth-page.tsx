@@ -99,7 +99,8 @@ export default function AuthPage() {
       {/* Hero Section */}
       <div className="bg-primary-500 text-white p-8 flex-1 flex flex-col justify-center items-center">
         <div className="max-w-md text-center">
-          <h1 className="text-4xl font-bold mb-6">🍀 三重分隊</h1>
+          <h1 className="text-4xl font-bold mb-2">🍀</h1>
+          <h3 className="text-lg font-medium mb-4">三重分隊協勤出入/救護簿</h3>
           <h2 className="text-2xl font-medium mb-4">協勤/退勤/救護記錄系統</h2>
           <p className="text-primary-100 mb-6">
             這個系統幫助志工追蹤工作時數、救護案件和活動記錄。方便簡單的介面讓您可以輕鬆管理所有志工活動。
