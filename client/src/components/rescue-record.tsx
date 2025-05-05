@@ -45,7 +45,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
       case "火警救助":
         return ["受困", "燒燙傷", "嗆傷"];
       case "緊急救援":
-        return ["山域", "水域", "交通事故"];
+        return ["山域", "水域"];
       case "打架受傷":
         return ["挫傷", "割傷", "撕裂傷"];
       default:
