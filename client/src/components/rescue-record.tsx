@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Rescue } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,12 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AmbulanceIcon, ExpandIcon, MedicalIcon, SaveIcon } from "./ui/icons";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import { FileDown } from "lucide-react";
 
 interface RescueRecordProps {
   onSubmit: (data: Partial<Rescue>) => void;
@@ -21,10 +24,15 @@ interface RescueRecordProps {
 }
 
 export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps) {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [caseType, setCaseType] = useState<string | undefined>();
   const [caseSubtype, setCaseSubtype] = useState<string | undefined>();
   const [treatment, setTreatment] = useState("");
+  const [showWoundDimensions, setShowWoundDimensions] = useState(false);
+  const [woundLength, setWoundLength] = useState("");
+  const [woundHeight, setWoundHeight] = useState("");
+  const [woundDepth, setWoundDepth] = useState("");
 
   const getSubtypes = (type: string) => {
     switch (type) {
@@ -58,19 +66,44 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
     setTreatment(treatment + prefix + text);
   };
 
+  // Check if the subtype is laceration to show wound dimensions
+  useEffect(() => {
+    setShowWoundDimensions(caseSubtype === "撕裂傷");
+  }, [caseSubtype]);
+
   const handleSubmit = () => {
     if (!caseType) return;
 
-    onSubmit({
+    const rescueData: Partial<Rescue> = {
       caseType,
       caseSubtype,
       treatment,
-    });
+    };
+
+    // Add wound dimensions if it's a laceration
+    if (showWoundDimensions) {
+      rescueData.woundLength = woundLength;
+      rescueData.woundHeight = woundHeight;
+      rescueData.woundDepth = woundDepth;
+    }
+
+    onSubmit(rescueData);
 
     // Reset form
     setCaseType(undefined);
     setCaseSubtype(undefined);
     setTreatment("");
+    setWoundLength("");
+    setWoundHeight("");
+    setWoundDepth("");
+  };
+
+  // Function to export data to Excel (for admin users)
+  const handleExport = () => {
+    // In a real application, this would trigger an API call to download Excel data
+    console.log("Exporting data to Excel...");
+    // This would normally be an API call like:
+    // window.location.href = "/api/rescues/export";
   };
 
   return (
