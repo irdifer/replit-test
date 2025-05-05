@@ -97,9 +97,9 @@ export default function AuthPage() {
   return (
     <div className="h-screen flex flex-col md:flex-row gap-0 overflow-hidden">
       {/* Hero Section */}
-      <div className="bg-primary-500 text-white px-6 py-0 pb-0 md:p-8 flex-[0.13] flex flex-col justify-start md:justify-center items-center">
+      <div className="bg-primary-500 text-white px-6 py-10 pb-10 md:p-8 flex-[0.25] flex flex-col justify-center md:justify-center items-center">
         <div className="max-w-md text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-0 md:mb-2 mt-0.5">🍀</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-0 md:mb-2 mt-0">🍀</h1>
           <h3 className="text-sm md:text-lg font-medium mb-0 md:mb-4 text-[#686868] bg-white/95 py-1 px-3 rounded-md inline-block">三重分隊協勤出入/救護簿</h3>
           <h2 className="text-xl md:text-2xl font-medium mb-0 md:mb-4 hidden md:block">協勤/退勤/救護記錄系統</h2>
           <p className="text-primary-100 mb-6 hidden md:block">
@@ -123,7 +123,7 @@ export default function AuthPage() {
       </div>
 
       {/* Auth Forms */}
-      <div className="flex-[0.7] px-6 py-0 pt-12 mt-[-20px] md:p-8 flex items-start md:items-center justify-center">
+      <div className="flex-[0.7] px-6 py-0 pt-4 md:p-8 flex items-start md:items-center justify-center">
         <Card className="w-full max-w-md max-h-[calc(100vh-120px)] md:max-h-full">
           <CardHeader className="pb-1 px-4 pt-3 md:p-6">
             <CardTitle>歡迎使用</CardTitle>
