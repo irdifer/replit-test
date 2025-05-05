@@ -55,13 +55,19 @@ export default function AuthPage() {
     },
   });
 
+  // Add role field to register schema
+  const registerSchemaWithRole = registerSchema.extend({
+    isAdmin: z.boolean().default(false),
+  });
+
   // Register form
-  const registerForm = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+  const registerForm = useForm<z.infer<typeof registerSchemaWithRole>>({
+    resolver: zodResolver(registerSchemaWithRole),
     defaultValues: {
       username: "",
       password: "",
       name: "",
+      isAdmin: false,
     },
   });
 
@@ -71,10 +77,12 @@ export default function AuthPage() {
   };
 
   // Handle register form submission
-  const onRegisterSubmit = (data: z.infer<typeof registerSchema>) => {
+  const onRegisterSubmit = (data: z.infer<typeof registerSchemaWithRole>) => {
     registerMutation.mutate({
-      ...data,
-      role: "volunteer",
+      username: data.username,
+      password: data.password,
+      name: data.name,
+      role: data.isAdmin ? "admin" : "volunteer",
     });
   };
 

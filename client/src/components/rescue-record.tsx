@@ -131,25 +131,25 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
         <div className="py-4 border-t border-neutral-100">
           {/* Case Type Selection */}
           <div className="mb-4">
-            <Label htmlFor="caseType" className="block text-sm font-medium text-neutral-700 mb-2">
+            <Label className="block text-sm font-medium text-neutral-700 mb-2">
               案件類型：
             </Label>
-            <Select value={caseType} onValueChange={(value) => {
-              setCaseType(value);
-              setCaseSubtype(undefined);
-            }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="請選擇" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="內科">內科</SelectItem>
-                <SelectItem value="外科">外科</SelectItem>
-                <SelectItem value="火警救助">火警救助</SelectItem>
-                <SelectItem value="其他">其他</SelectItem>
-                <SelectItem value="緊急救援">緊急救援</SelectItem>
-                <SelectItem value="打架受傷">打架受傷</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {["內科", "外科", "火警救助", "其他", "緊急救援", "打架受傷"].map(type => (
+                <Button
+                  key={type}
+                  type="button"
+                  variant={caseType === type ? "default" : "outline"}
+                  className={`justify-center ${caseType === type ? "bg-primary-500 hover:bg-primary-600" : "border-neutral-300"}`}
+                  onClick={() => {
+                    setCaseType(type);
+                    setCaseSubtype(undefined);
+                  }}
+                >
+                  {type}
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Subtype Selection */}
@@ -173,6 +173,54 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
             </div>
           )}
 
+          {/* Wound Dimensions (only shown for laceration) */}
+          {showWoundDimensions && (
+            <div className="mb-4 p-3 border border-amber-200 bg-amber-50 rounded-md">
+              <h4 className="flex items-center gap-1 font-medium mb-3 text-amber-800">
+                <MedicalIcon className="text-amber-600" />
+                傷口尺寸記錄
+              </h4>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label htmlFor="woundLength" className="block text-sm font-medium text-neutral-700 mb-1">
+                    長度 (cm)
+                  </Label>
+                  <Input
+                    id="woundLength"
+                    type="text"
+                    value={woundLength}
+                    onChange={(e) => setWoundLength(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="woundHeight" className="block text-sm font-medium text-neutral-700 mb-1">
+                    高度 (cm)
+                  </Label>
+                  <Input
+                    id="woundHeight"
+                    type="text"
+                    value={woundHeight}
+                    onChange={(e) => setWoundHeight(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="woundDepth" className="block text-sm font-medium text-neutral-700 mb-1">
+                    深度 (cm)
+                  </Label>
+                  <Input
+                    id="woundDepth"
+                    type="text"
+                    value={woundDepth}
+                    onChange={(e) => setWoundDepth(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Basic Treatment */}
           <div className="mb-4">
             <h4 className="flex items-center gap-1 font-medium mb-2">
@@ -210,11 +258,23 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
           </div>
 
           {/* Submit Button */}
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-between">
+            {/* Export Button (Admin only) */}
+            {user?.role === "admin" && (
+              <Button
+                onClick={handleExport}
+                variant="outline"
+                className="text-blue-600 border-blue-300 hover:bg-blue-50"
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                導出 Excel
+              </Button>
+            )}
+            
             <Button
               onClick={handleSubmit}
               disabled={!caseType || isPending}
-              className="bg-primary-500 hover:bg-primary-600 text-white font-medium"
+              className="bg-primary-500 hover:bg-primary-600 text-white font-medium ml-auto"
             >
               {isPending ? (
                 <>
