@@ -97,11 +97,11 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row gap-0">
       {/* Hero Section */}
-      <div className="bg-primary-500 text-white px-6 py-3 md:p-8 flex-1 flex flex-col justify-start md:justify-center items-center">
+      <div className="bg-primary-500 text-white px-6 py-2 pb-0 md:p-8 flex-1 flex flex-col justify-start md:justify-center items-center">
         <div className="max-w-md text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-1 md:mb-2">🍀</h1>
-          <h3 className="text-sm md:text-lg font-medium mb-1 md:mb-4 text-[#686868] bg-white/90 py-1 px-2 rounded inline-block">三重分隊協勤出入/救護簿</h3>
-          <h2 className="text-xl md:text-2xl font-medium mb-2 md:mb-4">協勤/退勤/救護記錄系統</h2>
+          <h1 className="text-3xl md:text-4xl font-bold mb-0 md:mb-2">🍀</h1>
+          <h3 className="text-sm md:text-lg font-medium mb-0 md:mb-4 text-[#686868] bg-white/90 py-1 px-2 rounded inline-block">三重分隊協勤出入/救護簿</h3>
+          <h2 className="text-xl md:text-2xl font-medium mb-0 md:mb-4 hidden md:block">協勤/退勤/救護記錄系統</h2>
           <p className="text-primary-100 mb-6 hidden md:block">
             這個系統幫助志工追蹤工作時數、救護案件和活動記錄。方便簡單的介面讓您可以輕鬆管理所有志工活動。
           </p>
@@ -123,8 +123,8 @@ export default function AuthPage() {
       </div>
 
       {/* Auth Forms */}
-      <div className="flex-1 px-6 py-4 md:p-8 flex items-start md:items-center justify-center">
-        <Card className="w-full max-w-md mt-0 md:mt-0">
+      <div className="flex-1 px-6 py-0 pt-0 -mt-6 md:p-8 flex items-start md:items-center justify-center">
+        <Card className="w-full max-w-md -mt-4 md:mt-0">
           <CardHeader className="pb-2 px-4 pt-4 md:p-6">
             <CardTitle>歡迎使用</CardTitle>
             <CardDescription>
