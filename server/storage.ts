@@ -1,9 +1,14 @@
 import { users, type User, type InsertUser, activities, type Activity, type InsertActivity, rescues, type Rescue, type InsertRescue, type DailyActivity, type Stats } from "@shared/schema";
-import session from "express-session";
+import * as session from "express-session";
 import createMemoryStore from "memorystore";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { db } from "./db";
+import { eq, and, gte, lte } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 // modify the interface with any CRUD methods
 // you might need
@@ -28,67 +33,72 @@ export interface IStorage {
   sessionStore: session.SessionStore;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private activities: Map<number, Activity>;
-  private rescues: Map<number, Rescue>;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.SessionStore;
-  
-  userCurrentId: number;
-  activityCurrentId: number;
-  rescueCurrentId: number;
 
   constructor() {
-    this.users = new Map();
-    this.activities = new Map();
-    this.rescues = new Map();
-    
-    this.userCurrentId = 1;
-    this.activityCurrentId = 1;
-    this.rescueCurrentId = 1;
-    
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
     });
   }
 
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    // Ensure all required fields have values, even if null
+    const values = {
+      ...insertUser,
+      role: insertUser.role || "volunteer",
+    };
+    
+    const [user] = await db
+      .insert(users)
+      .values(values)
+      .returning();
     return user;
   }
   
   // Activity methods
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
-    const id = this.activityCurrentId++;
-    const timestamp = new Date();
-    const activity: Activity = { ...insertActivity, id, timestamp };
-    this.activities.set(id, activity);
+    // Ensure all required fields have values, even if null
+    const values = {
+      ...insertActivity,
+      ip: insertActivity.ip || null,
+    };
+    
+    const [activity] = await db
+      .insert(activities)
+      .values(values)
+      .returning();
     return activity;
   }
   
   async getUserDailyActivities(userId: number): Promise<DailyActivity> {
     const today = new Date();
     const todayStr = format(today, "yyyy-MM-dd");
+    const todayStart = new Date(`${todayStr}T00:00:00`);
+    const todayEnd = new Date(`${todayStr}T23:59:59`);
     
-    // Filter today's activities for this user
-    const userTodayActivities = Array.from(this.activities.values()).filter(
-      (activity) => 
-        activity.userId === userId && 
-        format(new Date(activity.timestamp), "yyyy-MM-dd") === todayStr
-    );
+    // Get today's activities for this user
+    const userTodayActivities = await db.select()
+      .from(activities)
+      .where(
+        and(
+          eq(activities.userId, userId),
+          gte(activities.timestamp, todayStart),
+          lte(activities.timestamp, todayEnd)
+        )
+      );
     
     // Find sign in and sign out times
     const signInActivity = userTodayActivities.find(a => a.type === "signin");
@@ -102,29 +112,33 @@ export class MemStorage implements IStorage {
   }
   
   async getUserRecentActivities(userId: number): Promise<Activity[]> {
-    // Filter activities for this user and sort by timestamp (newest first)
-    const userActivities = Array.from(this.activities.values())
-      .filter(activity => activity.userId === userId)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 10); // Get only the 10 most recent activities
+    // Get the user's activities
+    const userActivities = await db.select()
+      .from(activities)
+      .where(eq(activities.userId, userId))
+      .orderBy(activities.timestamp, 'desc')
+      .limit(10);
     
-    // Get the user's rescues and convert them to activities for display
-    const userRescues = Array.from(this.rescues.values())
-      .filter(rescue => rescue.userId === userId)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 5) // Get only the 5 most recent rescues
-      .map(rescue => {
-        return {
-          id: rescue.id + 1000, // Ensure no ID collision with regular activities
-          userId: rescue.userId,
-          type: "rescue",
-          timestamp: rescue.timestamp,
-          ip: "", // Not applicable for rescues
-        } as Activity;
-      });
+    // Get the user's rescues
+    const userRescues = await db.select()
+      .from(rescues)
+      .where(eq(rescues.userId, userId))
+      .orderBy(rescues.timestamp, 'desc')
+      .limit(5);
+    
+    // Convert rescues to activities for display
+    const rescueActivities = userRescues.map(rescue => {
+      return {
+        id: rescue.id + 1000, // Ensure no ID collision with regular activities
+        userId: rescue.userId,
+        type: "rescue",
+        timestamp: rescue.timestamp,
+        ip: "", // Not applicable for rescues
+      } as Activity;
+    });
     
     // Combine and sort all activities
-    const combinedActivities = [...userActivities, ...userRescues]
+    const combinedActivities = [...userActivities, ...rescueActivities]
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 10);
     
@@ -133,10 +147,22 @@ export class MemStorage implements IStorage {
   
   // Rescue methods
   async createRescue(insertRescue: InsertRescue): Promise<Rescue> {
-    const id = this.rescueCurrentId++;
-    const timestamp = new Date();
-    const rescue: Rescue = { ...insertRescue, id, timestamp };
-    this.rescues.set(id, rescue);
+    // Ensure all required fields have values, even if null
+    const values = {
+      ...insertRescue,
+      caseSubtype: insertRescue.caseSubtype || null,
+      treatment: insertRescue.treatment || null,
+      startTime: insertRescue.startTime || null,
+      endTime: insertRescue.endTime || null,
+      woundLength: insertRescue.woundLength || null,
+      woundHeight: insertRescue.woundHeight || null,
+      woundDepth: insertRescue.woundDepth || null,
+    };
+    
+    const [rescue] = await db
+      .insert(rescues)
+      .values(values)
+      .returning();
     return rescue;
   }
   
@@ -146,14 +172,19 @@ export class MemStorage implements IStorage {
     const firstDayOfMonth = startOfMonth(now);
     const lastDayOfMonth = endOfMonth(now);
     
+    // Get user activities for this month
+    const userActivities = await db.select()
+      .from(activities)
+      .where(
+        and(
+          eq(activities.userId, userId),
+          gte(activities.timestamp, firstDayOfMonth),
+          lte(activities.timestamp, lastDayOfMonth)
+        )
+      );
+    
     // Calculate work hours
     let workHours = 0;
-    const userActivities = Array.from(this.activities.values())
-      .filter(activity => 
-        activity.userId === userId && 
-        new Date(activity.timestamp) >= firstDayOfMonth &&
-        new Date(activity.timestamp) <= lastDayOfMonth
-      );
     
     // Group activities by day
     const activitiesByDay = new Map<string, { signIn?: Date, signOut?: Date }>();
@@ -183,12 +214,16 @@ export class MemStorage implements IStorage {
     workHours = Math.round(workHours * 10) / 10;
     
     // Count rescue cases
-    const rescueCount = Array.from(this.rescues.values()).filter(
-      rescue => 
-        rescue.userId === userId && 
-        new Date(rescue.timestamp) >= firstDayOfMonth &&
-        new Date(rescue.timestamp) <= lastDayOfMonth
-    ).length;
+    const rescueCount = await db.select({ count: db.fn.count() })
+      .from(rescues)
+      .where(
+        and(
+          eq(rescues.userId, userId),
+          gte(rescues.timestamp, firstDayOfMonth),
+          lte(rescues.timestamp, lastDayOfMonth)
+        )
+      )
+      .then(result => Number(result[0]?.count || 0));
     
     return {
       workHours,
@@ -197,4 +232,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
