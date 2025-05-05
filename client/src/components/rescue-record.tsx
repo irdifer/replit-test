@@ -124,7 +124,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
       <CardContent 
         className={cn(
           "px-5 transition-all duration-300 overflow-hidden", 
-          isOpen ? "max-h-[1000px] py-4" : "max-h-0 py-0"
+          isOpen ? "max-h-[2000px] py-4" : "max-h-0 py-0"
         )}
       >
         <div className="py-4 border-t border-neutral-100">
