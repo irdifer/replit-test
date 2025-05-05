@@ -90,7 +90,7 @@ export default function HomePage() {
   };
   
   return (
-    <div className="bg-neutral-50 text-neutral-800 min-h-screen pb-16 md:pb-0">
+    <div className="bg-neutral-50 text-neutral-800 min-h-screen pb-16 md:pb-0 overflow-auto">
       {/* App Header */}
       <header className="bg-white shadow-sm border-b border-neutral-200 sticky top-0 z-10 px-4 py-3 md:px-6">
         <div className="max-w-5xl mx-auto">
