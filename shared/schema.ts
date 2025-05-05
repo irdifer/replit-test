@@ -38,6 +38,10 @@ export const rescues = pgTable("rescues", {
   caseSubtype: text("case_subtype"),
   treatment: text("treatment"),
   timestamp: timestamp("timestamp").notNull().defaultNow(),
+  // Wound dimensions for laceration injuries
+  woundLength: text("wound_length"),
+  woundHeight: text("wound_height"),
+  woundDepth: text("wound_depth"),
 });
 
 export const insertRescueSchema = createInsertSchema(rescues).pick({
@@ -45,6 +49,9 @@ export const insertRescueSchema = createInsertSchema(rescues).pick({
   caseType: true,
   caseSubtype: true,
   treatment: true,
+  woundLength: true,
+  woundHeight: true,
+  woundDepth: true,
 });
 
 // Types
