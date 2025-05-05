@@ -95,7 +95,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row gap-0">
+    <div className="h-screen flex flex-col md:flex-row gap-0 overflow-hidden">
       {/* Hero Section */}
       <div className="bg-primary-500 text-white px-6 py-2 pb-0 md:p-8 flex-1 flex flex-col justify-start md:justify-center items-center">
         <div className="max-w-md text-center">
@@ -124,16 +124,16 @@ export default function AuthPage() {
 
       {/* Auth Forms */}
       <div className="flex-1 px-6 py-0 pt-0 -mt-14 md:p-8 flex items-start md:items-center justify-center">
-        <Card className="w-full max-w-md -mt-4 md:mt-0">
-          <CardHeader className="pb-2 px-4 pt-4 md:p-6">
+        <Card className="w-full max-w-md -mt-4 md:mt-0 max-h-[calc(100vh-120px)] md:max-h-full">
+          <CardHeader className="pb-1 px-4 pt-3 md:p-6">
             <CardTitle>歡迎使用</CardTitle>
             <CardDescription>
               請登入或註冊以使用三重分隊記錄系統
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-0 px-4 md:p-6">
+          <CardContent className="pt-0 px-4 md:p-6 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsList className="grid w-full grid-cols-2 mb-2">
                 <TabsTrigger value="login">登入</TabsTrigger>
                 <TabsTrigger value="register">註冊</TabsTrigger>
               </TabsList>
@@ -143,7 +143,7 @@ export default function AuthPage() {
                 <Form {...loginForm}>
                   <form
                     onSubmit={loginForm.handleSubmit(onLoginSubmit)}
-                    className="space-y-4"
+                    className="space-y-3"
                   >
                     <FormField
                       control={loginForm.control}
@@ -191,7 +191,7 @@ export default function AuthPage() {
                 <Form {...registerForm}>
                   <form
                     onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-                    className="space-y-4"
+                    className="space-y-3"
                   >
                     <FormField
                       control={registerForm.control}
