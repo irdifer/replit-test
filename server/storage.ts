@@ -71,7 +71,22 @@ export class DatabaseStorage implements IStorage {
   
   // Activity methods
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
-    // Ensure all required fields have values, even if null
+    // 先檢查是否是測試帳號
+    if (insertActivity.userId) {
+      const user = await this.getUser(insertActivity.userId);
+      if (user && user.username === "test") {
+        // 測試帳號的活動不寫入數據庫，只回傳模擬的活動資料
+        return {
+          id: -1, // 無存在的ID
+          userId: insertActivity.userId,
+          type: insertActivity.type,
+          timestamp: new Date(),
+          ip: insertActivity.ip || null,
+        };
+      }
+    }
+    
+    // 如果不是測試帳號，則正常記錄活動
     const values = {
       ...insertActivity,
       ip: insertActivity.ip || null,
@@ -85,6 +100,17 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getUserDailyActivities(userId: number): Promise<DailyActivity> {
+    // 檢查是否為測試帳號
+    const user = await this.getUser(userId);
+    if (user && user.username === "test") {
+      // 測試帳號回傳空白的活動記錄
+      return {
+        signInTime: null,
+        signOutTime: null,
+        signOutIP: null
+      };
+    }
+    
     const today = new Date();
     const todayStr = format(today, "yyyy-MM-dd");
     const todayStart = new Date(`${todayStr}T00:00:00`);
@@ -113,6 +139,13 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getUserRecentActivities(userId: number): Promise<Activity[]> {
+    // 檢查是否為測試帳號
+    const user = await this.getUser(userId);
+    if (user && user.username === "test") {
+      // 測試帳號回傳空的活動歷史
+      return [];
+    }
+    
     // Get the user's activities
     const userActivities = await db.select()
       .from(activities)
@@ -148,7 +181,28 @@ export class DatabaseStorage implements IStorage {
   
   // Rescue methods
   async createRescue(insertRescue: InsertRescue): Promise<Rescue> {
-    // Ensure all required fields have values, even if null
+    // 檢查是否為測試帳號
+    if (insertRescue.userId) {
+      const user = await this.getUser(insertRescue.userId);
+      if (user && user.username === "test") {
+        // 測試帳號的救護記錄不寫入數據庫，只回傳模擬的救護資料
+        return {
+          id: -1, // 無存在的ID
+          userId: insertRescue.userId,
+          caseType: insertRescue.caseType,
+          caseSubtype: insertRescue.caseSubtype || null,
+          treatment: insertRescue.treatment || null,
+          startTime: insertRescue.startTime || null,
+          endTime: insertRescue.endTime || null,
+          woundLength: insertRescue.woundLength || null,
+          woundHeight: insertRescue.woundHeight || null,
+          woundDepth: insertRescue.woundDepth || null,
+          timestamp: new Date(),
+        };
+      }
+    }
+    
+    // 如果不是測試帳號，則正常記錄救護記錄
     const values = {
       ...insertRescue,
       caseSubtype: insertRescue.caseSubtype || null,
@@ -169,6 +223,16 @@ export class DatabaseStorage implements IStorage {
   
   // Stats methods
   async getUserStats(userId: number): Promise<Stats> {
+    // 檢查是否為測試帳號
+    const user = await this.getUser(userId);
+    if (user && user.username === "test") {
+      // 測試帳號則回傳固定的預設統計數據
+      return {
+        workHours: 0,
+        rescueCount: 0
+      };
+    }
+    
     const now = new Date();
     const firstDayOfMonth = startOfMonth(now);
     const lastDayOfMonth = endOfMonth(now);
