@@ -136,18 +136,18 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
             </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {["內科", "外科", "火警救助", "其他", "緊急救援", "打架受傷"].map(type => (
-                <Button
+                <button
                   key={type}
                   type="button"
-                  variant={caseType === type ? "default" : "outline"}
-                  className={`justify-center ${caseType === type ? "bg-primary-500 hover:bg-primary-600" : "border-neutral-300"}`}
-                  onClick={() => {
+                  className={`px-4 py-2 text-sm rounded-md w-full justify-center ${caseType === type ? "bg-primary-500 text-white hover:bg-primary-600" : "bg-white hover:bg-gray-50 border border-neutral-300"}`}
+                  onClick={(e) => {
+                    e.preventDefault();
                     setCaseType(type);
                     setCaseSubtype(undefined);
                   }}
                 >
                   {type}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -243,16 +243,17 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
             </Label>
             <div className="flex flex-wrap gap-2">
               {quickTags.map((tag) => (
-                <Button
+                <button
                   key={tag}
                   type="button"
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700"
-                  onClick={() => insertText(tag)}
+                  className="px-3 py-1 text-xs rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-neutral-200"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    insertText(tag);
+                  }}
                 >
                   {tag}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -261,33 +262,40 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
           <div className="mt-6 flex justify-between">
             {/* Export Button (Admin only) */}
             {user?.role === "admin" && (
-              <Button
-                onClick={handleExport}
-                variant="outline"
-                className="text-blue-600 border-blue-300 hover:bg-blue-50"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleExport();
+                }}
+                className="px-4 py-2 rounded-md text-sm font-medium text-blue-600 border border-blue-300 hover:bg-blue-50"
               >
-                <FileDown className="mr-2 h-4 w-4" />
+                <FileDown className="mr-2 h-4 w-4 inline-block" />
                 導出 Excel
-              </Button>
+              </button>
             )}
             
-            <Button
-              onClick={handleSubmit}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
               disabled={!caseType || isPending}
-              className="bg-primary-500 hover:bg-primary-600 text-white font-medium ml-auto"
+              className="px-4 py-2 rounded-md text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? (
                 <>
-                  <span className="animate-spin mr-2">⏳</span>
+                  <span className="inline-block animate-spin mr-2">⏳</span>
                   處理中...
                 </>
               ) : (
                 <>
-                  <SaveIcon className="mr-2 h-4 w-4" />
+                  <SaveIcon className="inline-block mr-2 h-4 w-4" />
                   儲存救護記錄
                 </>
               )}
-            </Button>
+            </button>
           </div>
         </div>
       </CardContent>
