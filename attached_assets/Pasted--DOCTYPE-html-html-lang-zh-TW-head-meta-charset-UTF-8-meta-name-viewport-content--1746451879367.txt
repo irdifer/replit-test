@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍀三重分隊 協勤/退勤/救護記錄系統</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    h1, h2 { margin-bottom: 10px; }
+    .summary { display: flex; gap: 20px; margin-bottom: 20px; }
+    .box { background: white; padding: 16px; border-radius: 8px; flex: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+    .today { margin-bottom: 20px; }
+    .btn { display: inline-block; padding: 10px 20px; margin: 6px; border: none; border-radius: 8px; background: #ddd; cursor: pointer; font-weight: bold; }
+    .accordion { margin-top: 20px; }
+    details { background: #fff; border-radius: 8px; margin-bottom: 10px; padding: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    textarea { width: 100%; min-height: 100px; margin-top: 10px; padding: 10px; }
+    .tags button { margin: 5px; padding: 6px 12px; border-radius: 16px; border: 1px solid #ccc; background: #eee; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>🍀 三重分隊 / <span id="userName">使用者</span></h1>
+  <h2>協勤 / 退勤 / 救護記錄系統</h2>
+
+  <div class="summary">
+    <div class="box">
+      <div>本月協勤時數</div>
+      <div><strong id="workHours">0</strong> 小時</div>
+    </div>
+    <div class="box">
+      <div>本月救護案件</div>
+      <div><strong id="rescueCount">0</strong> 件</div>
+    </div>
+  </div>
+
+  <div class="today">
+    <h3>📅 今日協勤記錄</h3>
+    <p>簽到時間：<span id="signInTime">--</span></p>
+    <p>退勤時間：<span id="signOutTime">--</span></p>
+    <p>退勤地點（IP）：<span id="signOutIP">--</span></p>
+  </div>
+
+  <div>
+    <button class="btn">協勤</button>
+    <button class="btn">退勤</button>
+    <button class="btn">常訓</button>
+    <button class="btn">公差</button>
+  </div>
+
+  <div class="accordion">
+    <details>
+      <summary>🚑 救護記錄</summary>
+      <p>案件類型：</p>
+      <select id="caseType">
+        <option disabled selected>請選擇</option>
+        <option>內科</option>
+        <option>外科</option>
+        <option>火警救助</option>
+        <option>其他</option>
+        <option>緊急救援</option>
+        <option>打架受傷</option>
+      </select>
+
+      <div id="subType"></div>
+
+      <h4>🛠️ 基本處置</h4>
+      <textarea placeholder="請描述現場處置內容..."></textarea>
+
+      <div class="tags">
+        <button onclick="insertText('生理監視 VS')">生理監視 VS</button>
+        <button onclick="insertText('心理支持 MS')">心理支持 MS</button>
+        <button onclick="insertText('現場待命')">現場待命</button>
+        <button onclick="insertText('撕裂傷 LW')">撕裂傷 LW</button>
+        <button onclick="insertText('擦傷 AW')">擦傷 AW</button>
+      </div>
+    </details>
+  </div>
+
+  <script>
+    // 帶入使用者
+    document.getElementById("userName").textContent = localStorage.getItem("userName") || "訪客";
+
+    // 子分類選單
+    document.getElementById("caseType").addEventListener("change", function() {
+      const value = this.value;
+      const sub = document.getElementById("subType");
+      let html = "";
+      if (value === "內科") {
+        html = `<label><input type="radio" name="sub"> 急病</label>
+                <label><input type="radio" name="sub"> OHCA</label>
+                <label><input type="radio" name="sub"> overdose</label>
+                <label><input type="radio" name="sub"> 意識不清</label>`;
+      } else if (value === "外科") {
+        html = `<label><input type="radio" name="sub"> 車禍</label>
+                <label><input type="radio" name="sub"> 路倒</label>`;
+      } else if (value === "其他") {
+        html = `<label><input type="radio" name="sub"> 精神急病</label>
+                <label><input type="radio" name="sub"> 自殺</label>
+                <label><input type="radio" name="sub"> 災害救助</label>`;
+      }
+      sub.innerHTML = html;
+    });
+
+    // 快速帶入文字
+    function insertText(text) {
+      const textarea = document.querySelector("textarea");
+      textarea.value += (textarea.value ? "\n" : "") + text;
+    }
+  </script>
+</body>
+</html>
