@@ -132,7 +132,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
                 <button
                   key={type}
                   type="button"
-                  className={`px-4 py-2 text-sm rounded-md w-full justify-center ${caseType === type ? "bg-primary-500 text-white hover:bg-primary-600" : "bg-white hover:bg-gray-50 border border-neutral-300"}`}
+                  className={`px-4 py-2 text-sm rounded-md w-full justify-center ${caseType === type ? "bg-[#58B2DC] text-white hover:bg-[#4B99BD]" : "bg-white hover:bg-gray-50 border border-neutral-300"}`}
                   onClick={(e) => {
                     e.preventDefault();
                     setCaseType(type);
@@ -156,7 +156,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
                   <button
                     key={subtype}
                     type="button"
-                    className={`px-3 py-2 rounded text-sm w-full ${caseSubtype === subtype ? "bg-blue-100 border-blue-300 text-blue-800" : "bg-white border-neutral-200 hover:bg-gray-50"} border`}
+                    className={`px-3 py-2 rounded text-sm w-full ${caseSubtype === subtype ? "bg-[#58B2DC] text-white border-[#4B99BD]" : "bg-white border-neutral-200 hover:bg-gray-50"} border`}
                     onClick={(e) => {
                       e.preventDefault();
                       setCaseSubtype(subtype);
@@ -279,7 +279,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
                   handleSubmit();
                 }}
                 disabled={!caseType || isPending}
-                className="px-6 py-3 rounded-md text-base font-medium bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 rounded-md text-base font-medium bg-[#58B2DC] hover:bg-[#4B99BD] text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isPending ? (
                   <>
