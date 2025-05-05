@@ -66,9 +66,9 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
     setTreatment(treatment + prefix + text);
   };
 
-  // Check if the subtype is laceration to show wound dimensions
+  // Check if the subtype is laceration or cut wound to show wound dimensions
   useEffect(() => {
-    setShowWoundDimensions(caseSubtype === "撕裂傷");
+    setShowWoundDimensions(caseSubtype === "撕裂傷" || caseSubtype === "割傷");
   }, [caseSubtype]);
 
   const handleSubmit = () => {
@@ -80,7 +80,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
       treatment,
     };
 
-    // Add wound dimensions if it's a laceration
+    // Add wound dimensions if it's a laceration or cut wound
     if (showWoundDimensions) {
       rescueData.woundLength = woundLength;
       rescueData.woundHeight = woundHeight;
@@ -173,7 +173,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
             </div>
           )}
 
-          {/* Wound Dimensions (only shown for laceration) */}
+          {/* Wound Dimensions (only shown for laceration or cut wound) */}
           {showWoundDimensions && (
             <div className="mb-4 p-3 border border-amber-200 bg-amber-50 rounded-md">
               <h4 className="flex items-center gap-1 font-medium mb-3 text-amber-800">
