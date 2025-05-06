@@ -131,7 +131,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       treatment: !treatment.trim(),
       hospital: !hospital,
       rescueType: !rescueType,
-      time: !startTime
+      time: !startTime || !endTime
     };
     
     setFormErrors(errors);
