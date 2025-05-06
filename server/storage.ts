@@ -35,7 +35,8 @@ export type RescueListItem = {
   caseType: string;
   caseSubtype: string | null;
   treatment: string | null;
-  hospital: string | null; // 新增送達醫院欄位
+  hospital: string | null; // 送達醫院欄位
+  rescueType: string | null; // ALS, BLS, PUA救護類別
   id: number;
 };
 

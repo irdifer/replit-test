@@ -424,6 +424,19 @@ export default function StatsPage() {
                             {expandedRescues.includes(rescue.id) && (
                               <div className="p-3 pt-0 pl-6 bg-neutral-50 text-sm">
                                 <div className="grid grid-cols-3 gap-2 mb-1">
+                                  <div className="font-medium">救護類別:</div>
+                                  <div className="col-span-2">
+                                    <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                      rescue.rescueType === "高級救護 (ALS)" ? "bg-red-100 text-red-800" : 
+                                      rescue.rescueType === "基本救護 (BLS)" ? "bg-green-100 text-green-800" : 
+                                      rescue.rescueType === "公用救護 (PUA)" ? "bg-amber-100 text-amber-800" : 
+                                      "bg-gray-100 text-gray-800"
+                                    }`}>
+                                      {rescue.rescueType || '未指定'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 mb-1">
                                   <div className="font-medium">案件子類型:</div>
                                   <div className="col-span-2">{rescue.caseSubtype || '-'}</div>
                                 </div>
@@ -447,7 +460,7 @@ export default function StatsPage() {
                             {isAdmin && <TableHead className="w-[100px]">隊員</TableHead>}
                             <TableHead className="w-[100px]">日期</TableHead>
                             <TableHead className="w-[80px]">出勤時間</TableHead>
-                            <TableHead className="w-[80px]">返隊時間</TableHead>
+                            <TableHead className="w-[100px]">救護類別</TableHead>
                             <TableHead className="w-[120px]">案件類型</TableHead>
                             <TableHead className="w-[60px]">詳細</TableHead>
                           </TableRow>
@@ -463,7 +476,16 @@ export default function StatsPage() {
                                   {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
                                   <TableCell className="font-medium">{formatDateMonthDay(rescue.date)}</TableCell>
                                   <TableCell>{rescue.time}</TableCell>
-                                  <TableCell>{"-"}</TableCell>
+                                  <TableCell>
+                                    <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                      rescue.rescueType === "高級救護 (ALS)" ? "bg-red-100 text-red-800" : 
+                                      rescue.rescueType === "基本救護 (BLS)" ? "bg-green-100 text-green-800" : 
+                                      rescue.rescueType === "公用救護 (PUA)" ? "bg-amber-100 text-amber-800" : 
+                                      "bg-gray-100 text-gray-800"
+                                    }`}>
+                                      {rescue.rescueType || '未指定'}
+                                    </span>
+                                  </TableCell>
                                   <TableCell>{rescue.caseType}</TableCell>
                                   <TableCell>
                                     {expandedRescues.includes(rescue.id) ? 
@@ -473,7 +495,7 @@ export default function StatsPage() {
                                 </TableRow>
                                 {expandedRescues.includes(rescue.id) && (
                                   <TableRow className="bg-neutral-50">
-                                    <TableCell colSpan={isAdmin ? 6 : 5} className="p-3">
+                                    <TableCell colSpan={isAdmin ? 7 : 6} className="p-3">
                                       <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div>
                                           <span className="font-medium">案件子類型: </span>
