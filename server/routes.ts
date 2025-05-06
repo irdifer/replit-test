@@ -2,6 +2,10 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
+import { db } from "./db";
+import { activities } from "@shared/schema";
+import { eq, and, gte, lte } from "drizzle-orm";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
