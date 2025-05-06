@@ -262,7 +262,8 @@ export default function StatsPage() {
     const worksheet = XLSX.utils.json_to_sheet(
       rescueList.map(rescue => ({
         '姓名': isAdmin ? (rescue.userName || '-') : (user?.name || '-'),
-        '時間': `${rescue.date} ${rescue.time}`,
+        '出勤時間': `${rescue.date} ${rescue.startTime || rescue.time}`,
+        '返隊時間': rescue.endTime || '-',
         '項目': rescue.caseType,
         '子項目': rescue.caseSubtype || '-',
         '送達醫院': rescue.hospital || '-',
@@ -273,7 +274,8 @@ export default function StatsPage() {
     // 設置工作表寬度
     const wscols = [
       { wch: 10 }, // 姓名
-      { wch: 20 }, // 時間 (合併日期和時間)
+      { wch: 20 }, // 出勤時間
+      { wch: 20 }, // 返隊時間
       { wch: 15 }, // 項目
       { wch: 15 }, // 子項目
       { wch: 15 }, // 送達醫院
@@ -506,8 +508,11 @@ export default function StatsPage() {
                             >
                               <div>
                                 {isAdmin && <div className="font-bold text-primary-600">{rescue.userName}</div>}
-                                <div className="font-medium">{formatDateMonthDay(rescue.date)} {rescue.time}</div>
-                                <div className="text-sm text-neutral-600">{rescue.caseType}</div>
+                                <div className="font-medium">{formatDateMonthDay(rescue.date)} {rescue.startTime || rescue.time}</div>
+                                <div className="text-sm text-neutral-600">
+                                  {rescue.caseType}
+                                  {rescue.endTime && <span className="ml-2 text-primary-600">返隊: {rescue.endTime}</span>}
+                                </div>
                               </div>
                               {expandedRescues.includes(rescue.id) ? 
                                 <ChevronDown className="h-5 w-5 text-neutral-400" /> : 
@@ -567,7 +572,8 @@ export default function StatsPage() {
                               >
                                 {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
                                 <TableCell className="font-medium">{formatDateMonthDay(rescue.date)}</TableCell>
-                                <TableCell>{rescue.time}</TableCell>
+                                <TableCell>{rescue.startTime || rescue.time}</TableCell>
+                                <TableCell>{rescue.endTime || '-'}</TableCell>
                                 <TableCell>
                                   <span className={`px-2 py-0.5 rounded-full text-xs ${
                                     rescue.rescueType === "高級救護 (ALS)" ? "bg-red-100 text-red-800" : 
@@ -587,7 +593,7 @@ export default function StatsPage() {
                               </TableRow>
                               {expandedRescues.includes(rescue.id) && (
                                 <TableRow className="bg-neutral-50">
-                                  <TableCell colSpan={isAdmin ? 7 : 6} className="p-3">
+                                  <TableCell colSpan={isAdmin ? 8 : 7} className="p-3">
                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                       <div>
                                         <span className="font-medium">案件子類型: </span>
