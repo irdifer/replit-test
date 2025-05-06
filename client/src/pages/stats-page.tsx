@@ -98,7 +98,7 @@ export default function StatsPage() {
         '協勤日期': activity.date,
         '協勤': activity.signInTime || '-',
         '退勤': activity.signOutTime || '-',
-        '時數': activity.duration + ' 小時'
+        '時數': activity.duration
       }))
     );
     
