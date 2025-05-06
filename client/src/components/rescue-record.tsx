@@ -89,30 +89,43 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
     setShowWoundDimensions(shouldShow);
   }, [caseSubtype]);
 
-  // 用於檢查時間是否在簽到和簽退範圍內的函數
-  const validateTimeInRange = (time: string): { isValid: boolean, message?: string } => {
-    // 如果沒有簽到或簽退，則無法驗證
-    if (!dailyActivity?.signInTime || !dailyActivity?.signOutTime) {
-      return { isValid: false, message: "你需要先完成簽到並簽退才能記錄救護案件時間" };
-    }
+  // 轉換為分鐘的幫助函數
+  const timeToMinutes = (timeStr: string): number => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
 
-    // 轉換為 24 小時格式的時間來比較
-    const timeToMinutes = (timeStr: string): number => {
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
+  // 驗證出動時間（不能早於簽到時間）
+  const validateStartTime = (time: string): { isValid: boolean, message?: string } => {
+    // 如果沒有簽到，則無法驗證
+    if (!dailyActivity?.signInTime) {
+      return { isValid: false, message: "你需要先簽到才能記錄出動時間" };
+    }
 
     const signInMinutes = timeToMinutes(dailyActivity.signInTime);
-    const signOutMinutes = timeToMinutes(dailyActivity.signOutTime);
-    const checkTimeMinutes = timeToMinutes(time);
+    const startTimeMinutes = timeToMinutes(time);
 
-    // 檢查新時間是否在簽到和簽退範圍內
-    if (checkTimeMinutes < signInMinutes) {
-      return { isValid: false, message: `救護時間不能早於今日簽到時間 (${dailyActivity.signInTime})` };
+    // 檢查出動時間是否不早於簽到時間
+    if (startTimeMinutes < signInMinutes) {
+      return { isValid: false, message: `出動時間不能早於協勤簽到時間 (${dailyActivity.signInTime})` };
     }
 
-    if (checkTimeMinutes > signOutMinutes) {
-      return { isValid: false, message: `救護時間不能晚於今日簽退時間 (${dailyActivity.signOutTime})` };
+    return { isValid: true };
+  };
+
+  // 驗證返隊時間（不能晚於簽退時間）
+  const validateEndTime = (time: string): { isValid: boolean, message?: string } => {
+    // 如果沒有簽退，則無法驗證
+    if (!dailyActivity?.signOutTime) {
+      return { isValid: false, message: "你需要先簽退才能記錄返隊時間" };
+    }
+
+    const signOutMinutes = timeToMinutes(dailyActivity.signOutTime);
+    const endTimeMinutes = timeToMinutes(time);
+
+    // 檢查返隊時間是否不晚於簽退時間
+    if (endTimeMinutes > signOutMinutes) {
+      return { isValid: false, message: `返隊時間不能晚於協勤簽退時間 (${dailyActivity.signOutTime})` };
     }
 
     return { isValid: true };
@@ -142,18 +155,18 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       return;
     }
 
-    // 驗證出動時間是否在簽到簽退範圍內
+    // 驗證出動時間是否不早於簽到時間
     if (startTime) {
-      const startValidation = validateTimeInRange(startTime);
+      const startValidation = validateStartTime(startTime);
       if (!startValidation.isValid) {
         alert(startValidation.message);
         return;
       }
     }
 
-    // 驗證返際時間是否在簽到簽退範圍內
+    // 驗證返隊時間是否不晚於簽退時間
     if (endTime) {
-      const endValidation = validateTimeInRange(endTime);
+      const endValidation = validateEndTime(endTime);
       if (!endValidation.isValid) {
         alert(endValidation.message);
         return;
