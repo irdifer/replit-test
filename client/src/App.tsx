@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
+import { IdleTimeoutHandler } from "@/hooks/use-idle-timeout";
 import { ProtectedRoute } from "./lib/protected-route";
 import HomePage from "@/pages/home-page";
 import NotFound from "@/pages/not-found";
@@ -31,6 +32,7 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
+          <IdleTimeoutHandler /> {/* 添加閒置超時處理器 */}
           <Router />
         </TooltipProvider>
       </AuthProvider>
