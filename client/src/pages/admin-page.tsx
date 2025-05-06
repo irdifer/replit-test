@@ -412,7 +412,7 @@ export default function AdminPage() {
                         </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isRegistered ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                            已註冊
+                            {volunteer.isRegistered ? "已註冊" : "未註冊"}
                           </span>
                         </TableCell>
                         <TableCell>{volunteer.username || "-"}</TableCell>
