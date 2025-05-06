@@ -20,6 +20,7 @@ export const volunteers = pgTable("volunteers", {
   isRegistered: boolean("is_registered").default(false), // 是否已成功註冊
   username: text("username").unique(), // 可能的用戶名
   notes: text("notes"), // 備註
+  teamType: text("team_type").default("T1"), // 隊員類型: T1, T2, TP
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -30,6 +31,7 @@ export const insertVolunteerSchema = createInsertSchema(volunteers).pick({
   isRegistered: true,
   username: true,
   notes: true,
+  teamType: true,
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
