@@ -39,7 +39,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
 
   // Case type mapping for subtypes
   const caseTypeMap = {
-    內科: ["急病", "OHCA", "overdose", "意識不清", "未接觸"],
+    內科: ["急病", "OHCA", "overdose", "意識不清", "急產", "未接觸"],
     外科: ["車禍", "路倒", "割傷", "撕裂傷", "未接觸"],
     其他: ["精神急病", "自殺", "災害救助", "未接觸"],
     火警救助: ["受困", "燒燙傷", "嗆傷", "未接觸"],
