@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -320,27 +320,56 @@ export default function StatsPage() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            {isAdmin && <TableHead className="w-[100px]">隊員姓名</TableHead>}
+                            {isAdmin && <TableHead className="w-[100px]">隊員</TableHead>}
                             <TableHead className="w-[100px]">日期</TableHead>
-                            <TableHead className="w-[80px]">時間</TableHead>
+                            <TableHead className="w-[80px]">出勤時間</TableHead>
+                            <TableHead className="w-[80px]">返隊時間</TableHead>
                             <TableHead className="w-[120px]">案件類型</TableHead>
-                            <TableHead className="w-[120px]">案件子類型</TableHead>
-                            <TableHead className="w-[120px]">送達醫院</TableHead>
-                            <TableHead className="w-[180px]">基本處置</TableHead>
+                            <TableHead className="w-[60px]">詳細</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {rescueList.map((rescue) => (
-                            <TableRow key={rescue.id}>
-                              {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
-                              <TableCell className="font-medium">{rescue.date}</TableCell>
-                              <TableCell>{rescue.time}</TableCell>
-                              <TableCell>{rescue.caseType}</TableCell>
-                              <TableCell>{rescue.caseSubtype || '-'}</TableCell>
-                              <TableCell>{rescue.hospital || '-'}</TableCell>
-                              <TableCell>{rescue.treatment || '-'}</TableCell>
-                            </TableRow>
-                          ))}
+                          {rescueList.map((rescue) => {
+                            return (
+                              <React.Fragment key={rescue.id}>
+                                <TableRow 
+                                  onClick={() => toggleRescueDetails(rescue.id)}
+                                  className="cursor-pointer hover:bg-neutral-50"
+                                >
+                                  {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
+                                  <TableCell className="font-medium">{rescue.date}</TableCell>
+                                  <TableCell>{rescue.time}</TableCell>
+                                  <TableCell>{"-"}</TableCell>
+                                  <TableCell>{rescue.caseType}</TableCell>
+                                  <TableCell>
+                                    {expandedRescues.includes(rescue.id) ? 
+                                      <ChevronDown className="h-5 w-5 text-neutral-400" /> : 
+                                      <ChevronRight className="h-5 w-5 text-neutral-400" />}
+                                  </TableCell>
+                                </TableRow>
+                                {expandedRescues.includes(rescue.id) && (
+                                  <TableRow className="bg-neutral-50">
+                                    <TableCell colSpan={isAdmin ? 6 : 5} className="p-3">
+                                      <div className="grid grid-cols-2 gap-3 text-sm">
+                                        <div>
+                                          <span className="font-medium">案件子類型: </span>
+                                          {rescue.caseSubtype || '-'}
+                                        </div>
+                                        <div>
+                                          <span className="font-medium">送達醫院: </span>
+                                          {rescue.hospital || '-'}
+                                        </div>
+                                        <div className="col-span-2">
+                                          <span className="font-medium">基本處置: </span>
+                                          {rescue.treatment || '-'}
+                                        </div>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     )}
