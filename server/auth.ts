@@ -55,12 +55,20 @@ const ALLOWED_VOLUNTEERS = [
 ];
 
 // 特殊測試帳號，不記錄活動
-const TEST_ACCOUNT = {
-  username: "test",
-  password: "test",
-  name: "測試帳號",
-  role: "volunteer"
-};
+const TEST_ACCOUNTS = [
+  {
+    username: "test",
+    password: "test",
+    name: "測試帳號",
+    role: "volunteer"
+  },
+  {
+    username: "3bug",
+    password: "123456",
+    name: "3bug帳號",
+    role: "volunteer"
+  }
+];
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
@@ -78,14 +86,17 @@ export function setupAuth(app: Express) {
   // 檢查並創建測試帳號
   (async () => {
     try {
-      const testUser = await storage.getUserByUsername(TEST_ACCOUNT.username);
-      if (!testUser) {
-        // 如果測試帳號不存在，創建它
-        await storage.createUser({
-          ...TEST_ACCOUNT,
-          password: await hashPassword(TEST_ACCOUNT.password),
-        });
-        console.log("測試帳號已創建");
+      // 創建所有測試帳號
+      for (const account of TEST_ACCOUNTS) {
+        const testUser = await storage.getUserByUsername(account.username);
+        if (!testUser) {
+          // 如果測試帳號不存在，創建它
+          await storage.createUser({
+            ...account,
+            password: await hashPassword(account.password),
+          });
+          console.log(`測試帳號 ${account.username} 已創建`);
+        }
       }
     } catch (error) {
       console.error("創建測試帳號時出錯:", error);
@@ -116,7 +127,7 @@ export function setupAuth(app: Express) {
     }
 
     // 如果是測試帳號名稱，不允許註冊
-    if (req.body.username === TEST_ACCOUNT.username) {
+    if (TEST_ACCOUNTS.some(account => account.username === req.body.username)) {
       return res.status(400).send("不能使用保留的用戶名");
     }
 
