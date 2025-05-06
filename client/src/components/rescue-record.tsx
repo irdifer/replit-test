@@ -43,6 +43,16 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
   const [woundDepth, setWoundDepth] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  
+  // 驗證狀態
+  const [formErrors, setFormErrors] = useState<{
+    caseType?: boolean;
+    caseSubtype?: boolean;
+    treatment?: boolean;
+    hospital?: boolean;
+    rescueType?: boolean;
+    time?: boolean;
+  }>({});
 
   // Case type mapping for subtypes
   const caseTypeMap = {
@@ -113,6 +123,24 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
 
   const handleSubmit = () => {
     if (!caseType) return;
+    
+    // 重置驗證狀態
+    const errors = {
+      caseType: !caseType,
+      caseSubtype: !caseSubtype,
+      treatment: !treatment.trim(),
+      hospital: !hospital,
+      rescueType: !rescueType,
+      time: !startTime
+    };
+    
+    setFormErrors(errors);
+    
+    // 檢查是否有任何錯誤
+    if (Object.values(errors).some(error => error)) {
+      // 如果有任何一個必填欄位空白，則不提交
+      return;
+    }
 
     // 驗證出動時間是否在簽到簽退範圍內
     if (startTime) {
@@ -206,7 +234,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
           {/* Case Type Selection */}
           <div className="mb-4">
             <Label className="block text-sm font-medium text-neutral-700 mb-2">
-              案件類型：
+              案件類型： {formErrors.caseType && <span className="text-red-600 ml-1">*必填</span>}
             </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {["內科", "外科", "火警救助", "其他", "緊急救援", "打架受傷"].map(type => (
@@ -230,7 +258,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
           {caseType && (
             <div className="mb-4">
               <Label className="block text-sm font-medium text-neutral-700 mb-2">
-                子類型：
+                子類型： {formErrors.caseSubtype && <span className="text-red-600 ml-1">*必填</span>}
               </Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                 {caseTypeMap[caseType as keyof typeof caseTypeMap]?.map((subtype: string) => (
@@ -306,7 +334,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
             </h4>
             <div>
               <Label htmlFor="hospital" className="block text-sm font-medium text-neutral-700 mb-1">
-                選擇送達醫院
+                選擇送達醫院 {formErrors.hospital && <span className="text-red-600 ml-1">*必填</span>}
               </Label>
               <Select
                 value={hospital}
@@ -345,7 +373,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
           <div className="mb-4 p-3 border border-blue-100 bg-blue-50 rounded-md">
             <h4 className="flex items-center gap-1 font-medium mb-3 text-blue-800">
               <span className="text-xl">🚑</span>
-              救護類別
+              救護類別 {formErrors.rescueType && <span className="text-red-600 ml-1">*必填</span>}
             </h4>
             <div className="grid grid-cols-3 gap-2">
               {["高級救護 (ALS)", "基本救護 (BLS)", "公用救護 (PUA)"].map(type => (
