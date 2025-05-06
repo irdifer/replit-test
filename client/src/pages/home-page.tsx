@@ -89,9 +89,39 @@ export default function HomePage() {
   // Handle action button clicks
   const handleAction = (type: string) => {
     activityMutation.mutate(type, {
-      onSuccess: () => {
-        // 手動重新請求最新的日常活動數據，確保畫面立即更新
-        setTimeout(() => refetchDailyActivity(), 500);
+      onSuccess: (data) => {
+        // 立即更新UI，不等待伺服器回應
+        if (data) {
+          // 使用得到的新活動記錄更新顯示時間
+          const now = new Date(data.timestamp);
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const time = `${hours}:${minutes}`;
+          
+          // 依據操作類型更新活動狀態顯示
+          if (type === "signin") {
+            // 簽到操作
+            const currentActivity = { 
+              signInTime: time, 
+              signOutTime: dailyActivity?.signOutTime || null, 
+              signOutIP: dailyActivity?.signOutIP || null 
+            };
+            // 直接更新前端的快取數據
+            queryClient.setQueryData(["/api/activities/daily"], currentActivity);
+          } else if (type === "signout") {
+            // 簽退操作
+            const currentActivity = { 
+              signInTime: dailyActivity?.signInTime || null, 
+              signOutTime: time, 
+              signOutIP: "即時更新" // 臨時顯示，會在重新獲取數據後更新
+            };
+            // 直接更新前端的快取數據
+            queryClient.setQueryData(["/api/activities/daily"], currentActivity);
+          }
+        }
+        
+        // 立即重新獲取所有相關數據
+        refetchDailyActivity();
       }
     });
   };
