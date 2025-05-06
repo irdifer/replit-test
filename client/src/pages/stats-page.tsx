@@ -33,6 +33,7 @@ type RescueListItem = {
   caseType: string;
   caseSubtype: string | null;
   treatment: string | null;
+  hospital: string | null; // 新增送達醫院欄位
   id: number;
 };
 
@@ -110,6 +111,7 @@ export default function StatsPage() {
         '時間': `${rescue.date} ${rescue.time}`,
         '項目': rescue.caseType,
         '子項目': rescue.caseSubtype || '-',
+        '送達醫院': rescue.hospital || '-',
         '敏述': rescue.treatment || '-'
       }))
     );
@@ -120,6 +122,7 @@ export default function StatsPage() {
       { wch: 20 }, // 時間 (合併日期和時間)
       { wch: 15 }, // 項目
       { wch: 15 }, // 子項目
+      { wch: 15 }, // 送達醫院
       { wch: 40 }  // 敏述
     ];
     worksheet['!cols'] = wscols;
@@ -272,9 +275,13 @@ export default function StatsPage() {
                                   <div className="font-medium">案件子類型:</div>
                                   <div className="col-span-2">{rescue.caseSubtype || '-'}</div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-3 gap-2 mb-1">
                                   <div className="font-medium">基本處置:</div>
                                   <div className="col-span-2">{rescue.treatment || '-'}</div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="font-medium">送達醫院:</div>
+                                  <div className="col-span-2">{rescue.hospital || '-'}</div>
                                 </div>
                               </div>
                             )}
@@ -289,6 +296,7 @@ export default function StatsPage() {
                             <TableHead className="w-[80px]">時間</TableHead>
                             <TableHead className="w-[120px]">案件類型</TableHead>
                             <TableHead className="w-[120px]">案件子類型</TableHead>
+                            <TableHead className="w-[120px]">送達醫院</TableHead>
                             <TableHead className="w-[180px]">基本處置</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -299,6 +307,7 @@ export default function StatsPage() {
                               <TableCell>{rescue.time}</TableCell>
                               <TableCell>{rescue.caseType}</TableCell>
                               <TableCell>{rescue.caseSubtype || '-'}</TableCell>
+                              <TableCell>{rescue.hospital || '-'}</TableCell>
                               <TableCell>{rescue.treatment || '-'}</TableCell>
                             </TableRow>
                           ))}
