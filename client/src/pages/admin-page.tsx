@@ -232,16 +232,7 @@ export default function AdminPage() {
                       className="col-span-3"
                     />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="position" className="text-right">身分</Label>
-                    <Input
-                      id="position"
-                      name="position"
-                      value={formData.position}
-                      onChange={handleInputChange}
-                      className="col-span-3"
-                    />
-                  </div>
+
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="username" className="text-right">用戶名</Label>
                     <Input
@@ -311,7 +302,6 @@ export default function AdminPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>姓名</TableHead>
-                      <TableHead>身分</TableHead>
                       <TableHead>管理權限</TableHead>
                       <TableHead>已註冊</TableHead>
                       <TableHead>用戶名</TableHead>
@@ -323,7 +313,6 @@ export default function AdminPage() {
                     {volunteers.map((volunteer) => (
                       <TableRow key={volunteer.id}>
                         <TableCell className="font-medium">{volunteer.name}</TableCell>
-                        <TableCell>{volunteer.position || "隊員"}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isAdmin ? "bg-blue-100 text-blue-800" : "bg-neutral-100 text-neutral-800"}`}>
                             {volunteer.isAdmin ? "管理員" : "隊員"}
@@ -387,16 +376,7 @@ export default function AdminPage() {
                   className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-position" className="text-right">身分</Label>
-                <Input
-                  id="edit-position"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                />
-              </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-username" className="text-right">用戶名</Label>
                 <Input
