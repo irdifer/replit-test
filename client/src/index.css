@@ -61,3 +61,17 @@
     @apply overflow-hidden;
   }
 }
+
+/* 全局動畫持續時間設置 */
+@layer utilities {
+  .duration-toast {
+    animation-duration: 150ms;
+    transition-duration: 150ms;
+  }
+  .animate-in {
+    animation-duration: 150ms;
+  }
+  .animate-out {
+    animation-duration: 150ms;
+  }
+}
