@@ -213,6 +213,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // 檢查用戶表中是否有同名的用戶
+      const allUsers = await storage.getAllUsers();
+      const userWithSameName = allUsers.find(user => user.name === name);
+      
+      // 如果有同名用戶且沒有指定用戶名，則退出
+      if (userWithSameName && !username) {
+        return res.status(400).json({ message: "User with same name already exists. Please specify a username." });
+      }
+      
       const volunteer = await storage.createVolunteer({
         name,
         position: position || "志工",
@@ -262,6 +271,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const existingUser = await storage.getUserByUsername(username);
         if (existingUser) {
           return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+      
+      // 如果要修改名稱，檢查用戶表中是否有同名的用戶
+      if (name && name !== currentVolunteer.name) {
+        const allUsers = await storage.getAllUsers();
+        const userWithSameName = allUsers.find(user => user.name === name);
+        
+        // 如果有同名用戶且沒有指定用戶名，則退出
+        if (userWithSameName && !username) {
+          return res.status(400).json({ message: "User with same name already exists. Please specify a username." });
         }
       }
       
