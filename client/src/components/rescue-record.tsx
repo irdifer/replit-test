@@ -49,7 +49,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
   
   // 醫院選項
   const hospitalOptions = [
-    "拒送", "明顯死亡", "市三", "北市中興", "台大", "北馬", "部北", "淡馬", "八里療養院", "松德療養院", "榮總", "新光", "新店慈濟", "輔大", "台北長庸", "林口長庸"
+    "拒送", "明顯死亡", "市三", "北市中興", "台大", "北馬", "部北", "淡馬", "八里療養院", "松德療養院", "榮總", "新光", "新店慈濟", "輔大", "台北長庼", "林口長庼"
   ];
 
   const quickTags = [
