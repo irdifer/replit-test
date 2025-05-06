@@ -72,19 +72,21 @@ export default function StatsPage() {
     // 準備Excel工作表數據
     const worksheet = XLSX.utils.json_to_sheet(
       monthlyActivities.map(activity => ({
-        '日期': activity.date,
-        '簽到時間': activity.signInTime || '-',
-        '簽退時間': activity.signOutTime || '-',
-        '協勤時數': activity.duration + ' 小時'
+        '姓名': user?.name || '-',
+        '協勤日期': activity.date,
+        '協勤': activity.signInTime || '-',
+        '退勤': activity.signOutTime || '-',
+        '時數': activity.duration + ' 小時'
       }))
     );
     
     // 設置工作表寬度
     const wscols = [
-      { wch: 12 }, // 日期
-      { wch: 10 }, // 簽到時間
-      { wch: 10 }, // 簽退時間
-      { wch: 10 }  // 協勤時數
+      { wch: 10 }, // 姓名
+      { wch: 12 }, // 協勤日期
+      { wch: 10 }, // 協勤
+      { wch: 10 }, // 退勤
+      { wch: 10 }  // 時數
     ];
     worksheet['!cols'] = wscols;
     
@@ -104,21 +106,21 @@ export default function StatsPage() {
     // 準備Excel工作表數據
     const worksheet = XLSX.utils.json_to_sheet(
       rescueList.map(rescue => ({
-        '日期': rescue.date,
-        '時間': rescue.time,
-        '案件類型': rescue.caseType,
-        '案件子類型': rescue.caseSubtype || '-',
-        '基本處置': rescue.treatment || '-'
+        '姓名': user?.name || '-',
+        '時間': `${rescue.date} ${rescue.time}`,
+        '項目': rescue.caseType,
+        '子項目': rescue.caseSubtype || '-',
+        '敏述': rescue.treatment || '-'
       }))
     );
     
     // 設置工作表寬度
     const wscols = [
-      { wch: 12 }, // 日期
-      { wch: 8 },  // 時間
-      { wch: 15 }, // 案件類型
-      { wch: 15 }, // 案件子類型
-      { wch: 40 }  // 基本處置
+      { wch: 10 }, // 姓名
+      { wch: 20 }, // 時間 (合併日期和時間)
+      { wch: 15 }, // 項目
+      { wch: 15 }, // 子項目
+      { wch: 40 }  // 敏述
     ];
     worksheet['!cols'] = wscols;
     
