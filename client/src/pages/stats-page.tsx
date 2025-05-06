@@ -51,7 +51,7 @@ export default function StatsPage() {
   const { toast } = useToast();
   const isAdmin = user?.role === "admin";
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
-  const [isRescueOpen, setIsRescueOpen] = useState(true);
+  const [isRescueOpen, setIsRescueOpen] = useState(false);
   const [expandedRescues, setExpandedRescues] = useState<number[]>([]);
   const isMobile = useIsMobile();
   
@@ -349,7 +349,12 @@ export default function StatsPage() {
           <Card>
             <CardHeader 
               className="px-5 py-4 border-b border-neutral-200 cursor-pointer"
-              onClick={() => setIsActivitiesOpen(!isActivitiesOpen)}
+              onClick={() => {
+                setIsActivitiesOpen(!isActivitiesOpen);
+                if (!isActivitiesOpen) {
+                  setIsRescueOpen(false); // 開啟協勤統計時，收合救護案件
+                }
+              }}
             >
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg">當月協勤統計 ({currentMonth})</CardTitle>
@@ -406,7 +411,12 @@ export default function StatsPage() {
           <Card>
             <CardHeader 
               className="px-5 py-4 border-b border-neutral-200 cursor-pointer"
-              onClick={() => setIsRescueOpen(!isRescueOpen)}
+              onClick={() => {
+                setIsRescueOpen(!isRescueOpen);
+                if (!isRescueOpen) {
+                  setIsActivitiesOpen(false); // 開啟救護案件時，收合協勤統計
+                }
+              }}
             >
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg">當月救護案件統計 ({currentMonth})</CardTitle>
