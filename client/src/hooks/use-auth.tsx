@@ -39,9 +39,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // 使用者登入成功後，清除相關查詢的緩存，確保預取最新資料
+      queryClient.invalidateQueries({ queryKey: ["/api/activities/monthly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rescues/list"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       toast({
         title: "登入成功",
         description: `歡迎回來，${user.name}！`,
+        duration: 3000, // 3秒後自動關閉
       });
     },
     onError: (error: Error) => {
