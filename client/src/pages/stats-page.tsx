@@ -11,6 +11,8 @@ import { formatInTimeZone } from "date-fns-tz";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import * as XLSX from "xlsx";
+import { Download } from "lucide-react";
 
 // 定義台灣時區
 const TAIWAN_TIMEZONE = "Asia/Taipei";
@@ -41,6 +43,7 @@ export default function StatsPage() {
   
   // 取得當前月份
   const currentMonth = format(new Date(), "yyyy 年 M 月", { locale: zhTW });
+  const currentMonthFile = format(new Date(), "yyyy-MM", { locale: zhTW });
   
   // 獲取月度活動記錄
   const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
@@ -51,6 +54,72 @@ export default function StatsPage() {
   const { data: rescueList, isLoading: rescueLoading } = useQuery<RescueListItem[]>({
     queryKey: ["/api/rescues/list"],
   });
+  
+  // 匯出月度協勤記錄到Excel
+  const exportActivitiesToExcel = () => {
+    if (!monthlyActivities || monthlyActivities.length === 0) return;
+    
+    // 準備Excel工作表數據
+    const worksheet = XLSX.utils.json_to_sheet(
+      monthlyActivities.map(activity => ({
+        '日期': activity.date,
+        '簽到時間': activity.signInTime || '-',
+        '簽退時間': activity.signOutTime || '-',
+        '協勤時數': activity.duration + ' 小時'
+      }))
+    );
+    
+    // 設置工作表寬度
+    const wscols = [
+      { wch: 12 }, // 日期
+      { wch: 10 }, // 簽到時間
+      { wch: 10 }, // 簽退時間
+      { wch: 10 }  // 協勤時數
+    ];
+    worksheet['!cols'] = wscols;
+    
+    // 創建一個新的工作簿
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '協勤統計');
+    
+    // 生成Excel檔案並下載
+    const fileName = `協勤統計_${user?.name}_${currentMonthFile}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+  
+  // 匯出救護案件記錄到Excel
+  const exportRescuesToExcel = () => {
+    if (!rescueList || rescueList.length === 0) return;
+    
+    // 準備Excel工作表數據
+    const worksheet = XLSX.utils.json_to_sheet(
+      rescueList.map(rescue => ({
+        '日期': rescue.date,
+        '時間': rescue.time,
+        '案件類型': rescue.caseType,
+        '案件子類型': rescue.caseSubtype || '-',
+        '基本處置': rescue.treatment || '-'
+      }))
+    );
+    
+    // 設置工作表寬度
+    const wscols = [
+      { wch: 12 }, // 日期
+      { wch: 8 },  // 時間
+      { wch: 15 }, // 案件類型
+      { wch: 15 }, // 案件子類型
+      { wch: 40 }  // 基本處置
+    ];
+    worksheet['!cols'] = wscols;
+    
+    // 創建一個新的工作簿
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '救護案件');
+    
+    // 生成Excel檔案並下載
+    const fileName = `救護案件_${user?.name}_${currentMonthFile}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
 
   return (
     <div className="bg-neutral-50 text-neutral-800 min-h-screen pb-16 md:pb-0 overflow-auto">
@@ -112,27 +181,40 @@ export default function StatsPage() {
               ) : !monthlyActivities || monthlyActivities.length === 0 ? (
                 <div className="py-4 text-center text-neutral-500">本月尚無協勤記錄</div>
               ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">日期</TableHead>
-                        <TableHead className="w-[100px]">簽到時間</TableHead>
-                        <TableHead className="w-[100px]">簽退時間</TableHead>
-                        <TableHead className="w-[100px] text-right">協勤時數</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {monthlyActivities.map((activity) => (
-                        <TableRow key={activity.date}>
-                          <TableCell className="font-medium">{activity.date}</TableCell>
-                          <TableCell>{activity.signInTime || '-'}</TableCell>
-                          <TableCell>{activity.signOutTime || '-'}</TableCell>
-                          <TableCell className="text-right">{activity.duration} 小時</TableCell>
+                <div>
+                  <div className="flex justify-end mb-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={exportActivitiesToExcel}
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-4 w-4" />
+                      匯出 Excel
+                    </Button>
+                  </div>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">日期</TableHead>
+                          <TableHead className="w-[100px]">簽到時間</TableHead>
+                          <TableHead className="w-[100px]">簽退時間</TableHead>
+                          <TableHead className="w-[100px] text-right">協勤時數</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {monthlyActivities.map((activity) => (
+                          <TableRow key={activity.date}>
+                            <TableCell className="font-medium">{activity.date}</TableCell>
+                            <TableCell>{activity.signInTime || '-'}</TableCell>
+                            <TableCell>{activity.signOutTime || '-'}</TableCell>
+                            <TableCell className="text-right">{activity.duration} 小時</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -164,29 +246,42 @@ export default function StatsPage() {
               ) : !rescueList || rescueList.length === 0 ? (
                 <div className="py-4 text-center text-neutral-500">本月尚無救護案件記錄</div>
               ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">日期</TableHead>
-                        <TableHead className="w-[80px]">時間</TableHead>
-                        <TableHead className="w-[120px]">案件類型</TableHead>
-                        <TableHead className="w-[120px]">案件子類型</TableHead>
-                        <TableHead className="w-[180px]">基本處置</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {rescueList.map((rescue) => (
-                        <TableRow key={rescue.id}>
-                          <TableCell className="font-medium">{rescue.date}</TableCell>
-                          <TableCell>{rescue.time}</TableCell>
-                          <TableCell>{rescue.caseType}</TableCell>
-                          <TableCell>{rescue.caseSubtype || '-'}</TableCell>
-                          <TableCell>{rescue.treatment || '-'}</TableCell>
+                <div>
+                  <div className="flex justify-end mb-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={exportRescuesToExcel}
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-4 w-4" />
+                      匯出 Excel
+                    </Button>
+                  </div>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">日期</TableHead>
+                          <TableHead className="w-[80px]">時間</TableHead>
+                          <TableHead className="w-[120px]">案件類型</TableHead>
+                          <TableHead className="w-[120px]">案件子類型</TableHead>
+                          <TableHead className="w-[180px]">基本處置</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {rescueList.map((rescue) => (
+                          <TableRow key={rescue.id}>
+                            <TableCell className="font-medium">{rescue.date}</TableCell>
+                            <TableCell>{rescue.time}</TableCell>
+                            <TableCell>{rescue.caseType}</TableCell>
+                            <TableCell>{rescue.caseSubtype || '-'}</TableCell>
+                            <TableCell>{rescue.treatment || '-'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               )}
             </CardContent>
