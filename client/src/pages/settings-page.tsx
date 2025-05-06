@@ -91,7 +91,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">姓名</Label>
                   <Input 
@@ -104,22 +104,19 @@ export default function SettingsPage() {
                   />
                   <p className="text-xs text-neutral-500">姓名由管理員設定，無法自行修改</p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="username">用戶名</Label>
-                  <Input 
-                    id="username" 
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="請輸入用戶名"
-                    readOnly={user?.role !== "admin"}
-                    className={user?.role !== "admin" ? "bg-neutral-50" : ""}
-                  />
-                  <p className="text-xs text-neutral-500">
-                    {user?.role === "admin" 
-                      ? "用戶名用於登入系統，請使用英文字母和數字" 
-                      : "用戶名由管理員設定，無法自行修改"}
-                  </p>
-                </div>
+                
+                {user?.role === "admin" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="username">用戶名</Label>
+                    <Input 
+                      id="username" 
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="請輸入用戶名"
+                    />
+                    <p className="text-xs text-neutral-500">用戶名用於登入系統，請使用英文字母和數字</p>
+                  </div>
+                )}
               </div>
               
               <div className="space-y-2">
