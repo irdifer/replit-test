@@ -153,6 +153,9 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       // 如果有任何一個必填欄位空白，則不提交
       return;
     }
+    
+    // 檢查控制台輸出，便於除錯
+    console.log("救護類別: ", rescueType);
 
     // 驗證出動時間是否不早於簽到時間
     if (startTime) {
