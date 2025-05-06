@@ -28,8 +28,14 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+// 定義志工列表項目的類型
+type VolunteerInfo = {
+  name: string;
+  isAdmin: boolean | null;
+};
+
 // 從數據庫中獲取允許註冊的志工名單
-async function getAllowedVolunteers() {
+async function getAllowedVolunteers(): Promise<VolunteerInfo[]> {
   try {
     const allVolunteers = await storage.getVolunteers();
     return allVolunteers.map(volunteer => ({
@@ -134,13 +140,13 @@ export function setupAuth(app: Express) {
     const allowedVolunteers = await getAllowedVolunteers();
     
     // 檢查名字是否在允許的志工名單中
-    const allowedVolunteer = allowedVolunteers.find(v => v.name === req.body.name);
+    const allowedVolunteer = allowedVolunteers.find((v: VolunteerInfo) => v.name === req.body.name);
     if (!allowedVolunteer) {
       return res.status(400).send("抱歉，您的姓名不在允許的志工名單中");
     }
 
     // 設置正確的角色（志工或管理員）
-    const role = allowedVolunteer.isAdmin ? "admin" : "volunteer";
+    const role = allowedVolunteer.isAdmin === true ? "admin" : "volunteer";
 
     const user = await storage.createUser({
       ...req.body,

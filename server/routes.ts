@@ -32,7 +32,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = req.user!.id;
     const { type } = req.body;
     const ip = req.ip || req.socket.remoteAddress || "";
+    
+    // 如果是簽到，需要清除之前的簽退記錄
+    if (type === "signin") {
+      // 使用台灣時區取得今天的日期
+      const today = toZonedTime(new Date(), "Asia/Taipei");
+      const todayStr = formatInTimeZone(today, "Asia/Taipei", "yyyy-MM-dd");
+      
+      // 台灣時區的今天開始和結束時間
+      const todayStart = new Date(`${todayStr}T00:00:00+08:00`);
+      const todayEnd = new Date(`${todayStr}T23:59:59+08:00`);
+      
+      // 刪除今天的所有簽退記錄
+      try {
+        await db.delete(activities)
+          .where(
+            and(
+              eq(activities.userId, userId),
+              eq(activities.type, "signout"),
+              gte(activities.timestamp, todayStart),
+              lte(activities.timestamp, todayEnd)
+            )
+          );
+      } catch (error) {
+        console.error("清除簽退記錄時出錯:", error);
+        // 即使清除失敗，我們仍然繼續創建新的簽到記錄
+      }
+    }
 
+    // 創建新活動記錄
     const activity = await storage.createActivity({
       userId,
       type,
