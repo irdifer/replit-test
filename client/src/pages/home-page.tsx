@@ -17,8 +17,10 @@ export default function HomePage() {
   const { toast } = useToast();
   
   // Fetch daily activity
-  const { data: dailyActivity } = useQuery<DailyActivity>({
+  const { data: dailyActivity, refetch: refetchDailyActivity } = useQuery<DailyActivity>({
     queryKey: ["/api/activities/daily"],
+    refetchOnWindowFocus: true,
+    staleTime: 10000, // 10秒內視為新鮮數據，減少不必要的請求
   });
   
   // Fetch statistics
@@ -38,9 +40,13 @@ export default function HomePage() {
       return await res.json();
     },
     onSuccess: () => {
+      // 立即刷新所有相關數據
       queryClient.invalidateQueries({ queryKey: ["/api/activities/daily"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities/recent"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      
+      // 強制重新獲取活動數據，確保UI更新
+      queryClient.refetchQueries({ queryKey: ["/api/activities/daily"] });
       
       toast({
         title: "活動記錄已更新",
@@ -82,7 +88,12 @@ export default function HomePage() {
   
   // Handle action button clicks
   const handleAction = (type: string) => {
-    activityMutation.mutate(type);
+    activityMutation.mutate(type, {
+      onSuccess: () => {
+        // 手動重新請求最新的日常活動數據，確保畫面立即更新
+        setTimeout(() => refetchDailyActivity(), 500);
+      }
+    });
   };
   
   // Handle rescue record submission
