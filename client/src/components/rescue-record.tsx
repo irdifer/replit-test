@@ -35,6 +35,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
   const [caseSubtype, setCaseSubtype] = useState<string | undefined>();
   const [treatment, setTreatment] = useState("");
   const [hospital, setHospital] = useState<string | undefined>(); // 新增送達醫院狀態
+  const [otherHospital, setOtherHospital] = useState<string>(""); // 自定義醫院名稱
   const [showWoundDimensions, setShowWoundDimensions] = useState(false);
   const [woundLength, setWoundLength] = useState("");
   const [woundHeight, setWoundHeight] = useState("");
@@ -54,7 +55,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
   
   // 醫院選項
   const hospitalOptions = [
-    "拒送", "明顯死亡", "市三", "北市中興", "台大", "北馬", "部北", "淡馬", "八里療養院", "松德療養院", "榮總", "新光", "新店慈濟", "輔大", "台北長庚", "林口長庚"
+    "拒送", "明顯死亡", "市三", "北市中興", "台大", "北馬", "部北", "淡馬", "八里療養院", "松德療養院", "榮總", "新光", "新店慈濟", "輔大", "台北長庚", "林口長庚", "其他"
   ];
 
   const quickTags = [
@@ -106,6 +107,9 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
     return { isValid: true };
   };
 
+  // 檢測選擇的醫院是否為 "其他"
+  const isOtherHospital = hospital === "其他";
+
   const handleSubmit = () => {
     if (!caseType) return;
 
@@ -131,7 +135,8 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       caseType,
       caseSubtype,
       treatment,
-      hospital,  // 添加送達醫院欄位
+      // 如果選擇的是其他，則使用自定義醫院名稱
+      hospital: isOtherHospital ? otherHospital : hospital,
       startTime,
       endTime,
     };
@@ -143,6 +148,12 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       rescueData.woundDepth = woundDepth;
     }
 
+    // 驗證如果選擇的是其他，則要求輸入自定義醫院名稱
+    if (isOtherHospital && !otherHospital.trim()) {
+      alert("請輸入醫院名稱");
+      return;
+    }
+
     onSubmit(rescueData);
 
     // Reset form
@@ -150,6 +161,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
     setCaseSubtype(undefined);
     setTreatment("");
     setHospital(undefined); // 重置送達醫院
+    setOtherHospital(""); // 重置自定義醫院名稱
     setWoundLength("");
     setWoundHeight("");
     setWoundDepth("");
@@ -306,6 +318,23 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* 顯示自定義醫院輸入欄位 */}
+              {isOtherHospital && (
+                <div className="mt-2">
+                  <Label htmlFor="otherHospital" className="block text-sm font-medium text-neutral-700 mb-1">
+                    輸入其他醫院名稱
+                  </Label>
+                  <Input
+                    id="otherHospital"
+                    type="text"
+                    value={otherHospital}
+                    onChange={(e) => setOtherHospital(e.target.value)}
+                    placeholder="請輸入醫院名稱..."
+                    className="w-full"
+                  />
+                </div>
+              )}
             </div>
           </div>
           
