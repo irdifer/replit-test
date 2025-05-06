@@ -437,6 +437,35 @@ export default function AdminPage() {
                   className="col-span-3"
                 />
               </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-teamType" className="text-right">隊員類型</Label>
+                <Select
+                  value={formData.teamType || "T1"}
+                  onValueChange={handleTeamTypeChange}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="選擇隊員類型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="T1">T1</SelectItem>
+                    <SelectItem value="T2">T2</SelectItem>
+                    <SelectItem value="TP">TP</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-position" className="text-right">職位</Label>
+                <Input
+                  id="edit-position"
+                  name="position"
+                  value={formData.position || "隊員"}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-isAdmin" className="text-right">管理權限</Label>
                 <div className="col-span-3 flex items-center">
