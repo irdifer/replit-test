@@ -1,7 +1,7 @@
 import { users, volunteers, type User, type InsertUser, type Volunteer, type InsertVolunteer, activities, type Activity, type InsertActivity, rescues, type Rescue, type InsertRescue, type DailyActivity, type Stats } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 
 // 定義台灣時區
@@ -165,9 +165,14 @@ export class DatabaseStorage implements IStorage {
     const today = toZonedTime(new Date(), TAIWAN_TIMEZONE);
     const todayStr = formatInTimeZone(today, TAIWAN_TIMEZONE, "yyyy-MM-dd");
     
-    // 台灣時區的今天開始和結束時間
-    const todayStart = new Date(`${todayStr}T00:00:00+08:00`);
-    const todayEnd = new Date(`${todayStr}T23:59:59+08:00`);
+    // 台灣時區的今天開始和結束時間使用數據庫能識別的UTC格式
+    // 為了確保時區轉換正確，我們使用date-fns-tz的功能
+    const startOfDayZoned = startOfDay(today);
+    const endOfDayZoned = endOfDay(today);
+    
+    // 轉換為全球UTC時間，以符合數據庫存儲格式
+    const todayStart = new Date(startOfDayZoned);
+    const todayEnd = new Date(endOfDayZoned);
     
     // Get today's activities for this user
     const userTodayActivities = await db.select()
