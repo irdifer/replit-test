@@ -253,7 +253,10 @@ async function fetchUserMonthlyActivities(userId: number) {
   // 計算每日的工作時數
   const result = [];
   
-  for (const [date, entry] of dailyActivities.entries()) {
+  // 將 Map.entries() 轉換為陣列以避免 TypeScript 循環問題
+  const entries = Array.from(dailyActivities.entries());
+  
+  for (const [date, entry] of entries) {
     // 只處理有簽到的日期
     if (entry.signIn) {
       const signInTime = formatInTimeZone(entry.signIn, 'Asia/Taipei', 'HH:mm');

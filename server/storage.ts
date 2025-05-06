@@ -469,6 +469,19 @@ export class DatabaseStorage implements IStorage {
   }
   
   async deleteVolunteer(id: number): Promise<void> {
+    // 先獲取志工資料，以取得可能的用戶名
+    const volunteer = await this.getVolunteer(id);
+    if (volunteer && volunteer.username) {
+      // 如果該志工已註冊（有用戶名），則也刪除對應的用戶記錄
+      // 首先查找是否有對應的用戶記錄
+      const user = await this.getUserByUsername(volunteer.username);
+      if (user) {
+        // 刪除用戶記錄
+        await db.delete(users).where(eq(users.username, volunteer.username));
+      }
+    }
+    
+    // 然後刪除志工記錄
     await db.delete(volunteers).where(eq(volunteers.id, id));
   }
   
