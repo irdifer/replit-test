@@ -345,6 +345,10 @@ export default function AdminPage() {
                               onClick={() => {
                                 if (confirm(`確定要刪除 ${volunteer.name} 嗎？`)) {
                                   deleteVolunteerMutation.mutate(volunteer.id);
+                                  // 強制立即重新獲取資料
+                                  setTimeout(() => {
+                                    refetchVolunteers();
+                                  }, 300);
                                 }
                               }}
                               disabled={deleteVolunteerMutation.isPending}
