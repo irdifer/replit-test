@@ -468,7 +468,7 @@ export default function StatsPage() {
                         <TableBody>
                           {rescueList.map((rescue) => {
                             return (
-                              <React.Fragment key={rescue.id}>
+                              <React.Fragment key={rescue.id} data-replit-metadata={null}>
                                 <TableRow 
                                   onClick={() => toggleRescueDetails(rescue.id)}
                                   className="cursor-pointer hover:bg-neutral-50"
