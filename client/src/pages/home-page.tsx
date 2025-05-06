@@ -100,14 +100,17 @@ export default function HomePage() {
           
           // 依據操作類型更新活動狀態顯示
           if (type === "signin") {
-            // 簽到操作
+            // 簽到操作 - 簽到時清除簽退相關數據
             const currentActivity = { 
               signInTime: time, 
-              signOutTime: dailyActivity?.signOutTime || null, 
-              signOutIP: dailyActivity?.signOutIP || null 
+              signOutTime: null, // 簽到時清除簽退時間
+              signOutIP: null // 簽到時清除簽退IP
             };
             // 直接更新前端的快取數據
             queryClient.setQueryData(["/api/activities/daily"], currentActivity);
+            
+            // 輸出日誌以檢查簽到操作是否清除了簽退數據
+            console.log("簽到操作後的活動數據:", currentActivity);
           } else if (type === "signout") {
             // 簽退操作
             const currentActivity = { 

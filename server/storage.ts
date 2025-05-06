@@ -200,10 +200,20 @@ export class DatabaseStorage implements IStorage {
     const latestSignIn = sortedActivities.find(a => a.type === "signin");
     const latestSignOut = sortedActivities.find(a => a.type === "signout");
     
+    // 簽到後不應該有簽退記錄，所以我們檢查時間戳
+    let showSignOut = false;
+    if (latestSignIn && latestSignOut) {
+      // 只有當簽退時間比簽到時間晚才額外顯示簽退記錄
+      showSignOut = new Date(latestSignOut.timestamp).getTime() > new Date(latestSignIn.timestamp).getTime();
+    }
+    
+    console.log(`用戶 ${userId} 的今日活動: 簽到=${!!latestSignIn}, 簽退=${!!latestSignOut}, 顯示簽退=${showSignOut}`);
+    
     return {
       signInTime: latestSignIn ? formatInTimeZone(new Date(latestSignIn.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
-      signOutTime: latestSignOut ? formatInTimeZone(new Date(latestSignOut.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
-      signOutIP: latestSignOut ? latestSignOut.ip : null,
+      // 只有當簽退時間比簽到時間晚才額外顯示簽退記錄
+      signOutTime: (showSignOut && latestSignOut) ? formatInTimeZone(new Date(latestSignOut.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
+      signOutIP: (showSignOut && latestSignOut) ? latestSignOut.ip : null,
     };
   }
   
