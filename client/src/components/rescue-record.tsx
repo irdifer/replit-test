@@ -36,6 +36,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
   const [treatment, setTreatment] = useState("");
   const [hospital, setHospital] = useState<string | undefined>(); // 新增送達醫院狀態
   const [otherHospital, setOtherHospital] = useState<string>(""); // 自定義醫院名稱
+  const [rescueType, setRescueType] = useState<string | undefined>(); // ALS, BLS, PUA类型
   const [showWoundDimensions, setShowWoundDimensions] = useState(false);
   const [woundLength, setWoundLength] = useState("");
   const [woundHeight, setWoundHeight] = useState("");
@@ -137,6 +138,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       treatment,
       // 如果選擇的是其他，則使用自定義醫院名稱
       hospital: isOtherHospital ? otherHospital : hospital,
+      rescueType,
       startTime,
       endTime,
     };
@@ -162,6 +164,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
     setTreatment("");
     setHospital(undefined); // 重置送達醫院
     setOtherHospital(""); // 重置自定義醫院名稱
+    setRescueType(undefined); // 重置ALS, BLS, PUA類型
     setWoundLength("");
     setWoundHeight("");
     setWoundDepth("");
@@ -335,6 +338,31 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
                   />
                 </div>
               )}
+            </div>
+          </div>
+          
+          {/* Rescue Type Selection (ALS, BLS, PUA) */}
+          <div className="mb-4 p-3 border border-blue-100 bg-blue-50 rounded-md">
+            <h4 className="flex items-center gap-1 font-medium mb-3 text-blue-800">
+              <span className="text-xl">🚑</span>
+              救護類別
+            </h4>
+            <div className="grid grid-cols-3 gap-2">
+              {["高級救護 (ALS)", "基本救護 (BLS)", "公用救護 (PUA)"].map(type => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`px-4 py-2 text-sm rounded-md w-full justify-center ${
+                    rescueType === type ? "bg-blue-500 text-white hover:bg-blue-600" 
+                    : "bg-white hover:bg-gray-50 border border-blue-200"}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setRescueType(type);
+                  }}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
           </div>
           
