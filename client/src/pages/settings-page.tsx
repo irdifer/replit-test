@@ -111,8 +111,14 @@ export default function SettingsPage() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="請輸入用戶名"
+                    readOnly={user?.role !== "admin"}
+                    className={user?.role !== "admin" ? "bg-neutral-50" : ""}
                   />
-                  <p className="text-xs text-neutral-500">用戶名用於登入系統，請使用英文字母和數字</p>
+                  <p className="text-xs text-neutral-500">
+                    {user?.role === "admin" 
+                      ? "用戶名用於登入系統，請使用英文字母和數字" 
+                      : "用戶名由管理員設定，無法自行修改"}
+                  </p>
                 </div>
               </div>
               
@@ -148,25 +154,27 @@ export default function SettingsPage() {
                 <p className="text-xs text-neutral-500">密碼長度應至少為6個字符</p>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <Button
-                  onClick={() => {
-                    if (username !== user?.username) {
-                      updateUserMutation.mutate({ username });
-                    } else {
-                      toast({
-                        title: "請注意",
-                        description: "用戶名未變更",
-                        variant: "default",
-                      });
-                    }
-                  }}
-                  disabled={updateUserMutation.isPending || username === user?.username || !username}
-                  className="w-full"
-                  variant="outline"
-                >
-                  {updateUserMutation.isPending ? "處理中..." : "更新用戶名"}
-                </Button>
+              <div className="grid grid-cols-1 gap-4 mt-4">
+                {user?.role === "admin" && (
+                  <Button
+                    onClick={() => {
+                      if (username !== user?.username) {
+                        updateUserMutation.mutate({ username });
+                      } else {
+                        toast({
+                          title: "請注意",
+                          description: "用戶名未變更",
+                          variant: "default",
+                        });
+                      }
+                    }}
+                    disabled={updateUserMutation.isPending || username === user?.username || !username}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    {updateUserMutation.isPending ? "處理中..." : "更新用戶名"}
+                  </Button>
+                )}
                 
                 <Button
                   onClick={() => {
