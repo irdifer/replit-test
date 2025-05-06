@@ -14,6 +14,7 @@ import { zhTW } from "date-fns/locale";
 import * as XLSX from "xlsx";
 import { Download, ChevronRight, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 // 定義台灣時區
 const TAIWAN_TIMEZONE = "Asia/Taipei";
@@ -46,6 +47,7 @@ type RescueListItem = {
 
 export default function StatsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const isAdmin = user?.role === "admin";
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
   const [isRescueOpen, setIsRescueOpen] = useState(true);
@@ -104,9 +106,42 @@ export default function StatsPage() {
   const exportActivitiesToExcel = () => {
     if (!monthlyActivities || monthlyActivities.length === 0) return;
     
-    // 準備Excel工作表數據
+    // 檢查是否有不完整的記錄（僅有簽到但無簽退）
+    const incompleteActivities = monthlyActivities.filter(activity => 
+      (activity.signInTime && !activity.signOutTime)
+    );
+    
+    // 如果有不完整記錄，顯示提示
+    if (incompleteActivities.length > 0) {
+      // 收集日期列表顯示
+      const incompleteDates = incompleteActivities
+        .map(a => formatDateMonthDay(a.date))
+        .join('、');
+      
+      toast({
+        title: '檢測到未完成的協勤記錄',
+        description: `${incompleteDates} 日期的協勤記錄沒有退勤資料，這些記錄不會被匯出。`,
+        variant: 'destructive',
+      });
+    }
+    
+    // 只匯出完整的記錄（有簽到也有簽退的記錄）
+    const completeActivities = monthlyActivities.filter(activity => 
+      (activity.signInTime && activity.signOutTime)
+    );
+    
+    if (completeActivities.length === 0) {
+      toast({
+        title: '無法匯出',
+        description: '沒有完整的協勤記錄可供匯出（需要有簽到和簽退資料）。',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // 準備Excel工作表數據，只包含完整的記錄
     const worksheet = XLSX.utils.json_to_sheet(
-      monthlyActivities.map(activity => ({
+      completeActivities.map(activity => ({
         '姓名': isAdmin ? (activity.userName || '-') : (user?.name || '-'),
         '協勤日期': activity.date,
         '協勤': activity.signInTime || '-',
@@ -134,6 +169,12 @@ export default function StatsPage() {
       ? `協勤統計_所有隊員_${currentMonthFile}.xlsx`
       : `協勤統計_${user?.name}_${currentMonthFile}.xlsx`;
     XLSX.writeFile(workbook, fileName);
+    
+    toast({
+      title: '匯出成功',
+      description: `已匯出 ${completeActivities.length} 筆完整協勤記錄。`,
+      variant: 'default',
+    });
   };
   
   // 匯出救護案件記錄到Excel
@@ -172,6 +213,12 @@ export default function StatsPage() {
       ? `救護案件_所有隊員_${currentMonthFile}.xlsx` 
       : `救護案件_${user?.name}_${currentMonthFile}.xlsx`;
     XLSX.writeFile(workbook, fileName);
+    
+    toast({
+      title: '匯出成功',
+      description: `已匯出 ${rescueList.length} 筆救護案件記錄。`,
+      variant: 'default',
+    });
   };
 
   return (
