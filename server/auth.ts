@@ -67,6 +67,12 @@ const TEST_ACCOUNTS = [
     password: "123456",
     name: "3bug帳號",
     role: "volunteer"
+  },
+  {
+    username: "admin",
+    password: "admin",
+    name: "管理員帳號",
+    role: "admin"
   }
 ];
 
