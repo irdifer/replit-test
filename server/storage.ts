@@ -17,6 +17,22 @@ const PostgresSessionStore = connectPg(session);
 
 // modify the interface with any CRUD methods
 // you might need
+// 定義月度活動記錄類型
+export type MonthlyActivity = {
+  date: string;
+  signInTime: string | null;
+  signOutTime: string | null;
+  duration: number; // 以小時為單位
+};
+
+// 定義救護案件列表項目類型
+export type RescueListItem = {
+  date: string;
+  caseType: string;
+  caseSubtype: string | null;
+  id: number;
+};
+
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
@@ -27,9 +43,11 @@ export interface IStorage {
   createActivity(activity: InsertActivity): Promise<Activity>;
   getUserDailyActivities(userId: number): Promise<DailyActivity>;
   getUserRecentActivities(userId: number): Promise<Activity[]>;
+  getUserMonthlyActivities(userId: number): Promise<MonthlyActivity[]>;
   
   // Rescue methods
   createRescue(rescue: InsertRescue): Promise<Rescue>;
+  getUserRescuesList(userId: number): Promise<RescueListItem[]>;
   
   // Stats methods
   getUserStats(userId: number): Promise<Stats>;
@@ -184,6 +202,132 @@ export class DatabaseStorage implements IStorage {
       .slice(0, 10);
     
     return combinedActivities;
+  }
+  
+  // 獲取用戶月度活動記錄
+  async getUserMonthlyActivities(userId: number): Promise<MonthlyActivity[]> {
+    // 檢查是否為測試帳號
+    const user = await this.getUser(userId);
+    if (user && user.username === "test") {
+      // 測試帳號回傳空的活動記錄
+      return [];
+    }
+    
+    // 獲取本月的開始和結束日期
+    const now = toZonedTime(new Date(), TAIWAN_TIMEZONE);
+    const firstDayOfMonthZoned = startOfMonth(now);
+    const lastDayOfMonthZoned = endOfMonth(now);
+    
+    // 需要將台灣時區的日期轉換為 UTC 以連結數據庫
+    const firstDayStr = formatInTimeZone(firstDayOfMonthZoned, TAIWAN_TIMEZONE, "yyyy-MM-dd");
+    const lastDayStr = formatInTimeZone(lastDayOfMonthZoned, TAIWAN_TIMEZONE, "yyyy-MM-dd");
+    const firstDayOfMonth = new Date(`${firstDayStr}T00:00:00+08:00`);
+    const lastDayOfMonth = new Date(`${lastDayStr}T23:59:59+08:00`);
+    
+    // 獲取用戶本月所有活動
+    const userActivities = await db.select()
+      .from(activities)
+      .where(
+        and(
+          eq(activities.userId, userId),
+          gte(activities.timestamp, firstDayOfMonth),
+          lte(activities.timestamp, lastDayOfMonth)
+        )
+      )
+      .orderBy(activities.timestamp);
+    
+    // 按日期分組活動
+    const activitiesByDay = new Map<string, { 
+      date: string, 
+      signIn?: Date, 
+      signInStr?: string, 
+      signOut?: Date, 
+      signOutStr?: string, 
+      duration: number 
+    }>();
+    
+    // 處理每一個活動記錄
+    userActivities.forEach(activity => {
+      const date = formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd");
+      const entry = activitiesByDay.get(date) || { date, duration: 0 };
+      
+      if (activity.type === "signin") {
+        entry.signIn = new Date(activity.timestamp);
+        entry.signInStr = formatInTimeZone(entry.signIn, TAIWAN_TIMEZONE, "HH:mm");
+      } else if (activity.type === "signout") {
+        entry.signOut = new Date(activity.timestamp);
+        entry.signOutStr = formatInTimeZone(entry.signOut, TAIWAN_TIMEZONE, "HH:mm");
+      }
+      
+      // 計算時長
+      if (entry.signIn && entry.signOut) {
+        // 確保時間差為正數，使用 Math.abs 取絕對值
+        const timeDiff = Math.abs(entry.signOut.getTime() - entry.signIn.getTime());
+        const hours = timeDiff / (1000 * 60 * 60);
+        
+        // 排除異常的時間差 (大於24小時或小於0的情況)
+        if (hours > 0 && hours <= 24) {
+          entry.duration = Math.round(hours * 10) / 10; // 四捨五入到小數點後一位
+        }
+      }
+      
+      activitiesByDay.set(date, entry);
+    });
+    
+    // 轉換為陣列並格式化為API響應格式
+    const monthlyActivities: MonthlyActivity[] = Array.from(activitiesByDay.values())
+      .map(entry => ({
+        date: entry.date,
+        signInTime: entry.signInStr || null,
+        signOutTime: entry.signOutStr || null,
+        duration: entry.duration || 0
+      }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // 依照日期排序，最新的在前
+    
+    return monthlyActivities;
+  }
+  
+  // 獲取用戶的救護案件列表
+  async getUserRescuesList(userId: number): Promise<RescueListItem[]> {
+    // 檢查是否為測試帳號
+    const user = await this.getUser(userId);
+    if (user && user.username === "test") {
+      // 測試帳號回傳空的救護記錄
+      return [];
+    }
+    
+    // 獲取本月的開始和結束日期
+    const now = toZonedTime(new Date(), TAIWAN_TIMEZONE);
+    const firstDayOfMonthZoned = startOfMonth(now);
+    const lastDayOfMonthZoned = endOfMonth(now);
+    
+    // 需要將台灣時區的日期轉換為 UTC 以連結數據庫
+    const firstDayStr = formatInTimeZone(firstDayOfMonthZoned, TAIWAN_TIMEZONE, "yyyy-MM-dd");
+    const lastDayStr = formatInTimeZone(lastDayOfMonthZoned, TAIWAN_TIMEZONE, "yyyy-MM-dd");
+    const firstDayOfMonth = new Date(`${firstDayStr}T00:00:00+08:00`);
+    const lastDayOfMonth = new Date(`${lastDayStr}T23:59:59+08:00`);
+    
+    // 獲取用戶本月所有救護案件
+    const userRescues = await db.select()
+      .from(rescues)
+      .where(
+        and(
+          eq(rescues.userId, userId),
+          gte(rescues.timestamp, firstDayOfMonth),
+          lte(rescues.timestamp, lastDayOfMonth)
+        )
+      )
+      .orderBy(desc(rescues.timestamp)); // 最新的在前
+    
+    // 將救護案件轉換為列表項目格式
+    const rescueList: RescueListItem[] = userRescues.map(rescue => ({
+      date: formatInTimeZone(new Date(rescue.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd"),
+      caseType: rescue.caseType,
+      caseSubtype: rescue.caseSubtype,
+      id: rescue.id
+    }));
+    
+    return rescueList;
   }
   
   // Rescue methods
