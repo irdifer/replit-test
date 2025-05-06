@@ -55,6 +55,10 @@ export default function StatsPage() {
   const [expandedRescues, setExpandedRescues] = useState<number[]>([]);
   const isMobile = useIsMobile();
   
+  // 月份選擇器狀態
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
+
   // 切換救護案件詳細信息顯示
   const toggleRescueDetails = (id: number) => {
     setExpandedRescues(prev => 
@@ -63,8 +67,20 @@ export default function StatsPage() {
   };
   
   // 取得當前月份
-  const currentMonth = format(new Date(), "yyyy 年 M 月", { locale: zhTW });
-  const currentMonthFile = format(new Date(), "yyyy-MM", { locale: zhTW });
+  const currentMonth = format(new Date(selectedYear, selectedMonth - 1), "yyyy 年 M 月", { locale: zhTW });
+  const currentMonthFile = format(new Date(selectedYear, selectedMonth - 1), "yyyy-MM", { locale: zhTW });
+  
+  // 處理月份變更
+  const handleMonthChange = (newMonth: number) => {
+    setSelectedMonth(newMonth);
+    // 在這裡可以加入重新載入資料的邏輯
+  };
+  
+  // 處理年份變更
+  const handleYearChange = (newYear: number) => {
+    setSelectedYear(newYear);
+    // 在這裡可以加入重新載入資料的邏輯
+  };
   
   // 格式化日期，只顯示月和日
   const formatDateMonthDay = (dateString: string) => {
@@ -81,10 +97,15 @@ export default function StatsPage() {
   
   // 獲取月度活動記錄
   const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
-    queryKey: ["/api/activities/monthly", isAdmin],
+    queryKey: ["/api/activities/monthly", isAdmin, selectedYear, selectedMonth],
     queryFn: async ({ queryKey }) => {
       const isAdmin = queryKey[1] as boolean;
-      const url = isAdmin ? `/api/activities/monthly?all=true` : '/api/activities/monthly';
+      const selectedYear = queryKey[2] as number;
+      const selectedMonth = queryKey[3] as number;
+      const yearMonthParam = `year=${selectedYear}&month=${selectedMonth}`;
+      const url = isAdmin 
+        ? `/api/activities/monthly?all=true&${yearMonthParam}` 
+        : `/api/activities/monthly?${yearMonthParam}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch data');
       return res.json();
@@ -93,10 +114,15 @@ export default function StatsPage() {
   
   // 獲取救護案件列表
   const { data: rescueList, isLoading: rescueLoading } = useQuery<RescueListItem[]>({
-    queryKey: ["/api/rescues/list", isAdmin],
+    queryKey: ["/api/rescues/list", isAdmin, selectedYear, selectedMonth],
     queryFn: async ({ queryKey }) => {
       const isAdmin = queryKey[1] as boolean;
-      const url = isAdmin ? `/api/rescues/list?all=true` : '/api/rescues/list';
+      const selectedYear = queryKey[2] as number;
+      const selectedMonth = queryKey[3] as number;
+      const yearMonthParam = `year=${selectedYear}&month=${selectedMonth}`;
+      const url = isAdmin 
+        ? `/api/rescues/list?all=true&${yearMonthParam}` 
+        : `/api/rescues/list?${yearMonthParam}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch data');
       return res.json();
@@ -468,7 +494,7 @@ export default function StatsPage() {
                         <TableBody>
                           {rescueList.map((rescue) => {
                             return (
-                              <React.Fragment key={rescue.id} data-replit-metadata={null}>
+                              <React.Fragment key={rescue.id}>
                                 <TableRow 
                                   onClick={() => toggleRescueDetails(rescue.id)}
                                   className="cursor-pointer hover:bg-neutral-50"
@@ -525,6 +551,37 @@ export default function StatsPage() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* 月份選擇區域 */}
+        <div className="bg-white p-4 rounded-lg border border-neutral-200 shadow-sm mb-6">
+          <h3 className="text-lg font-semibold mb-3">月份選擇</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-medium text-neutral-700 mb-2">選擇年份</h4>
+              <select 
+                className="w-full p-2 border border-neutral-300 rounded-md bg-white"
+                value={selectedYear}
+                onChange={(e) => handleYearChange(parseInt(e.target.value))}
+              >
+                {Array.from({ length: 5 }, (_, i) => 2025 - i).map(year => (
+                  <option key={year} value={year}>{year}年</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-neutral-700 mb-2">選擇月份</h4>
+              <select 
+                className="w-full p-2 border border-neutral-300 rounded-md bg-white"
+                value={selectedMonth}
+                onChange={(e) => handleMonthChange(parseInt(e.target.value))}
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                  <option key={month} value={month}>{month}月</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* 匯出功能區 - 只有管理員可見 */}
