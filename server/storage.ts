@@ -485,11 +485,15 @@ export class DatabaseStorage implements IStorage {
     }
     
     // 如果不是測試帳號，則正常記錄救護記錄
+    // 記錄執行中的參數，便於除錯
+    console.log('救護類別資料：', insertRescue.rescueType);
+    
     const values = {
       ...insertRescue,
       caseSubtype: insertRescue.caseSubtype || null,
       treatment: insertRescue.treatment || null,
       hospital: insertRescue.hospital || null,
+      rescueType: insertRescue.rescueType || null, // 確保救護類別有正確處理
       startTime: insertRescue.startTime || null,
       endTime: insertRescue.endTime || null,
       woundLength: insertRescue.woundLength || null,
