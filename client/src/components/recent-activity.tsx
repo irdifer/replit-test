@@ -114,22 +114,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
         </div>
       </CardHeader>
       
-      {/* Excel 匯出按鈕 */}
-      <div className="px-5 py-3 border-t border-neutral-200 flex justify-end">
-        <Button 
-          onClick={(e) => {
-            e.stopPropagation(); // 防止觸發收合/展開
-            handleExportExcel();
-          }}
-          variant="outline"
-          size="sm"
-          className="text-sm font-medium"
-          disabled={!activities || activities.length === 0}
-        >
-          <SaveIcon className="mr-1.5 h-4 w-4" />
-          匯出 EXCEL
-        </Button>
-      </div>
+      {/* 移除了Excel匯出按鈕 */}
       
       <CardContent 
         className={cn(
