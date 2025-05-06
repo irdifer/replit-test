@@ -45,8 +45,11 @@ export default function ActionButtons({ onAction, isPending, dailyActivity }: Ac
   const isButtonDisabled = (actionType: string) => {
     if (isPending) return true;
     
+    // 已簽到但未簽退的狀態
+    const isOnDuty = dailyActivity?.signInTime && !dailyActivity?.signOutTime;
+    
     // 簽到禁用條件：已經簽到
-    if (actionType === "signin" && dailyActivity?.signInTime && !dailyActivity?.signOutTime) {
+    if (actionType === "signin" && isOnDuty) {
       return true;
     }
     
@@ -55,7 +58,11 @@ export default function ActionButtons({ onAction, isPending, dailyActivity }: Ac
       return true;
     }
     
-    // 注意：常訓和公差作業即使已簽到但未簽退也不禁用
+    // 常訓和公差禁用條件：已在協勤中，不能同時進行常訓或公差
+    if ((actionType === "training" || actionType === "duty") && isOnDuty) {
+      return true;
+    }
+    
     return false;
   };
 
