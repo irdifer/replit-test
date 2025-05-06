@@ -40,6 +40,7 @@ type RescueListItem = {
   caseSubtype: string | null;
   treatment: string | null;
   hospital: string | null; // 新增送達醫院欄位
+  rescueType: string | null; // ALS, BLS, PUA
   id: number;
   userId?: number; // 僅管理員視圖中存在
   userName?: string; // 僅管理員視圖中存在
