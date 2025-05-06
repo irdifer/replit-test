@@ -159,10 +159,13 @@ export function AmbulanceIcon(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <path d="m2 8 2-2h2.5L8 4.5 10.5 6H18l2 2v8a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" />
-      <circle cx="8" cy="16" r="2" />
+      <path d="M19 12h2l-2 4h2" />
+      <path d="M5 14v.5M5 2v1c0 1-1 2-2 2s-2 1-2 2v4c0 1 1 2 2 2h1" />
+      <path d="M5 2v10c0 1 1 2 2 2h6" />
+      <path d="M12 14v-4m0 0h-2m2 0h2" fill="red" />
       <circle cx="16" cy="16" r="2" />
-      <path d="m12 11 2 3h-4l2-3Z" />
+      <circle cx="7" cy="16" r="2" />
+      <path d="M9 16h5" />
     </svg>
   );
 }
