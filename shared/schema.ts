@@ -123,6 +123,16 @@ export type DailyActivity = {
   signOutIP: string | null;
 };
 
+export type MonthlyActivity = {
+  date: string;
+  signInTime: string | null;
+  signOutTime: string | null;
+  duration: number;
+  isTimeError?: boolean; // 標記時間順序錯誤
+  activityId?: number; // 可用於識別特定記錄
+  activityType?: string; // 活動類型 (signin/signout)
+};
+
 export type Stats = {
   workHours: number;
   rescueCount: number;

@@ -269,84 +269,137 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(activities.userId, userId),
           gte(activities.timestamp, firstDayOfMonth),
-          lte(activities.timestamp, lastDayOfMonth)
+          lte(activities.timestamp, lastDayOfMonth),
+          or(
+            eq(activities.type, "signin"),
+            eq(activities.type, "signout")
+          )
         )
       )
-      .orderBy(activities.timestamp);
+      .orderBy(desc(activities.timestamp)); // 最新的在前
+    
+    // 創建日期到簽到/簽退記錄的映射
+    const dateToActivities = new Map<string, Activity[]>();
     
     // 按日期分組活動
-    type DailyActivityEntry = {
-      date: string;
-      signIn?: Date;
-      signInStr?: string;
-      signOut?: Date;
-      signOutStr?: string;
-      duration: number;
-    };
-    const activitiesByDay = new Map<string, DailyActivityEntry>();
-    
-    // 按日期分組活動
-    const activitiesByDate = userActivities.reduce((acc, activity) => {
+    for (const activity of userActivities) {
       const date = formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd");
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(activity);
-      return acc;
-    }, {} as Record<string, Activity[]>);
+      if (!dateToActivities.has(date)) {
+        dateToActivities.set(date, []);
+      }
+      dateToActivities.get(date)?.push(activity);
+    }
     
-    // 處理每一天的活動記錄
-    Object.entries(activitiesByDate).forEach(([date, dailyActivities]) => {
-      // 依照時間戳排序，以便取得最新的記錄
-      const sortedActivities = [...dailyActivities].sort((a, b) => 
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
+    // 創建結果陣列
+    const monthlyActivities: MonthlyActivity[] = [];
+    
+    // 按日期處理所有簽到和簽退記錄
+    for (const [date, activitiesForDate] of dateToActivities.entries()) {
+      // 分離簽到和簽退記錄
+      const signIns = activitiesForDate.filter(a => a.type === "signin");
+      const signOuts = activitiesForDate.filter(a => a.type === "signout");
       
-      // 找到最新的簽到和簽退記錄
-      const latestSignIn = sortedActivities.find(a => a.type === "signin");
-      const latestSignOut = sortedActivities.find(a => a.type === "signout");
-      
-      const entry: {
-        date: string;
-        duration: number;
-        signIn?: Date;
-        signInStr?: string;
-        signOut?: Date;
-        signOutStr?: string;
-      } = { date, duration: 0 };
-      
-      if (latestSignIn) {
-        entry.signIn = new Date(latestSignIn.timestamp);
-        entry.signInStr = formatInTimeZone(entry.signIn, TAIWAN_TIMEZONE, "HH:mm");
-      }
-      
-      if (latestSignOut) {
-        entry.signOut = new Date(latestSignOut.timestamp);
-        entry.signOutStr = formatInTimeZone(entry.signOut, TAIWAN_TIMEZONE, "HH:mm");
-      }
-      
-      // 計算時長
-      if (entry.signIn && entry.signOut) {
-        // 確保時間差為正數，使用 Math.abs 取絕對值
-        const timeDiff = Math.abs(entry.signOut.getTime() - entry.signIn.getTime());
-        const hours = timeDiff / (1000 * 60 * 60);
+      // 如果有簽到和簽退記錄，創建匯配對
+      if (signIns.length > 0 && signOuts.length > 0) {
+        // 使用最新的簽到和簽退記錄創建主記錄
+        const latestSignIn = signIns[0]; // 已按時間降序排序，所以第一個就是最新的
+        const latestSignOut = signOuts[0];
         
-        // 排除異常的時間差 (大於24小時或小於0的情況)
+        const signInTime = formatInTimeZone(new Date(latestSignIn.timestamp), TAIWAN_TIMEZONE, "HH:mm");
+        const signOutTime = formatInTimeZone(new Date(latestSignOut.timestamp), TAIWAN_TIMEZONE, "HH:mm");
+        
+        // 計算時長
+        const signInDate = new Date(latestSignIn.timestamp);
+        const signOutDate = new Date(latestSignOut.timestamp);
+        const timeDiff = Math.abs(signOutDate.getTime() - signInDate.getTime());
+        const hours = timeDiff / (1000 * 60 * 60);
+        let duration = 0;
+        
+        // 排除異常的時間差
         if (hours > 0 && hours <= 24) {
-          entry.duration = Math.round(hours * 10) / 10; // 四捨五入到小數點後一位
+          duration = Math.round(hours * 10) / 10; // 四捨五入到小數點後一位
+        }
+        
+        // 檢查簽到時間是否晚於簽退時間
+        const isTimeError = signInDate.getTime() > signOutDate.getTime();
+        
+        // 添加匯配對主記錄
+        monthlyActivities.push({
+          date,
+          signInTime,
+          signOutTime,
+          duration,
+          isTimeError,
+          activityId: latestSignIn.id,
+          activityType: "pair" // 標記為簽到和簽退的配對
+        });
+        
+        // 另外添加所有其他簽到記錄 (除了最新的)
+        for (let i = 1; i < signIns.length; i++) {
+          const otherSignIn = signIns[i];
+          monthlyActivities.push({
+            date,
+            signInTime: formatInTimeZone(new Date(otherSignIn.timestamp), TAIWAN_TIMEZONE, "HH:mm"),
+            signOutTime: null,
+            duration: 0,
+            activityId: otherSignIn.id,
+            activityType: "signin"
+          });
+        }
+        
+        // 另外添加所有其他簽退記錄 (除了最新的)
+        for (let i = 1; i < signOuts.length; i++) {
+          const otherSignOut = signOuts[i];
+          monthlyActivities.push({
+            date,
+            signInTime: null,
+            signOutTime: formatInTimeZone(new Date(otherSignOut.timestamp), TAIWAN_TIMEZONE, "HH:mm"),
+            duration: 0,
+            activityId: otherSignOut.id,
+            activityType: "signout"
+          });
+        }
+      } else {
+        // 只有簽到記錄
+        for (const signIn of signIns) {
+          monthlyActivities.push({
+            date,
+            signInTime: formatInTimeZone(new Date(signIn.timestamp), TAIWAN_TIMEZONE, "HH:mm"),
+            signOutTime: null,
+            duration: 0,
+            activityId: signIn.id,
+            activityType: "signin"
+          });
+        }
+        
+        // 只有簽退記錄
+        for (const signOut of signOuts) {
+          monthlyActivities.push({
+            date,
+            signInTime: null,
+            signOutTime: formatInTimeZone(new Date(signOut.timestamp), TAIWAN_TIMEZONE, "HH:mm"),
+            duration: 0,
+            activityId: signOut.id,
+            activityType: "signout"
+          });
         }
       }
-      
-      activitiesByDay.set(date, entry);
-    });
+    }
     
-    // 轉換為陣列並格式化為API響應格式
-    const monthlyActivities: MonthlyActivity[] = Array.from(activitiesByDay.values())
-      .map(entry => ({
-        date: entry.date,
-        signInTime: entry.signInStr || null,
-        signOutTime: entry.signOutStr || null,
-        duration: entry.duration || 0
-      }))
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // 依照日期排序，最新的在前
+    // 先按日期排序，然後按活動類型排序。這樣簽到簽退對就會在最上面。
+    monthlyActivities.sort((a, b) => {
+      // 先按日期倖序排序，最新的在前
+      const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (dateComparison !== 0) {
+        return dateComparison;
+      }
+      
+      // 另外讓配對的記錄位於最前面
+      if (a.activityType === "pair" && b.activityType !== "pair") return -1;
+      if (a.activityType !== "pair" && b.activityType === "pair") return 1;
+      
+      return 0;
+    });
     
     return monthlyActivities;
   }
