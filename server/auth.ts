@@ -28,31 +28,24 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-// 允許註冊的志工名單，以及管理員標記
-const ALLOWED_VOLUNTEERS = [
-  { name: "楊宗銘", isAdmin: false },
-  { name: "蔡萬達", isAdmin: false },
-  { name: "林居逸", isAdmin: false },
-  { name: "呂泓鈞", isAdmin: false },
-  { name: "林思廷", isAdmin: false },
-  { name: "林承志", isAdmin: false },
-  { name: "許毓庭", isAdmin: true },  // 管理員
-  { name: "林漢忠", isAdmin: false },
-  { name: "黃璽諭", isAdmin: false },
-  { name: "林士閎", isAdmin: false },
-  { name: "吳佩姍", isAdmin: false },
-  { name: "洪雅婕", isAdmin: false },
-  { name: "吳盈學", isAdmin: false },
-  { name: "古易軒", isAdmin: false },
-  { name: "邱俊雄", isAdmin: false },
-  { name: "王伶瑜", isAdmin: false },
-  { name: "黃紫涵", isAdmin: false },
-  { name: "朱麗鳳", isAdmin: false },
-  { name: "郭秀琴", isAdmin: false },
-  { name: "温世同", isAdmin: false },
-  { name: "蔡湘禾", isAdmin: false },
-  { name: "朱昶達", isAdmin: true },  // 管理員
-];
+// 從數據庫中獲取允許註冊的志工名單
+async function getAllowedVolunteers() {
+  try {
+    const allVolunteers = await storage.getVolunteers();
+    return allVolunteers.map(volunteer => ({
+      name: volunteer.name,
+      isAdmin: volunteer.isAdmin
+    }));
+  } catch (error) {
+    console.error('獲取志工名單失敗:', error);
+    // 如果無法取得數據庫數據，則返回預設名單
+    return [
+      { name: "許毓庭", isAdmin: true },
+      { name: "朱昶達", isAdmin: true },
+      { name: "3BUG", isAdmin: false }
+    ];
+  }
+}
 
 // 特殊測試帳號，不記錄活動
 const TEST_ACCOUNTS = [
@@ -137,8 +130,11 @@ export function setupAuth(app: Express) {
       return res.status(400).send("不能使用保留的用戶名");
     }
 
+    // 從數據庫獲取允許註冊的志工名單
+    const allowedVolunteers = await getAllowedVolunteers();
+    
     // 檢查名字是否在允許的志工名單中
-    const allowedVolunteer = ALLOWED_VOLUNTEERS.find(v => v.name === req.body.name);
+    const allowedVolunteer = allowedVolunteers.find(v => v.name === req.body.name);
     if (!allowedVolunteer) {
       return res.status(400).send("抱歉，您的姓名不在允許的志工名單中");
     }
