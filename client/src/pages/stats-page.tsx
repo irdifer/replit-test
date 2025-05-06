@@ -113,12 +113,12 @@ export default function StatsPage() {
     // 準備Excel工作表數據
     const worksheet = XLSX.utils.json_to_sheet(
       rescueList.map(rescue => ({
-        '姓名': user?.name || '-',
+        '姓名': isAdmin ? (rescue.userName || '-') : (user?.name || '-'),
         '時間': `${rescue.date} ${rescue.time}`,
         '項目': rescue.caseType,
         '子項目': rescue.caseSubtype || '-',
         '送達醫院': rescue.hospital || '-',
-        '敏述': rescue.treatment || '-'
+        '敘述': rescue.treatment || '-'
       }))
     );
     
@@ -129,7 +129,7 @@ export default function StatsPage() {
       { wch: 15 }, // 項目
       { wch: 15 }, // 子項目
       { wch: 15 }, // 送達醫院
-      { wch: 40 }  // 敏述
+      { wch: 40 }  // 敘述
     ];
     worksheet['!cols'] = wscols;
     
@@ -138,7 +138,9 @@ export default function StatsPage() {
     XLSX.utils.book_append_sheet(workbook, worksheet, '救護案件');
     
     // 生成Excel檔案並下載
-    const fileName = `救護案件_${user?.name}_${currentMonthFile}.xlsx`;
+    const fileName = isAdmin 
+      ? `救護案件_所有隊員_${currentMonthFile}.xlsx` 
+      : `救護案件_${user?.name}_${currentMonthFile}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
