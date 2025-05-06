@@ -257,7 +257,7 @@ export default function StatsPage() {
 
         {/* 月度統計摘要 */}
         <div className="mb-6 p-4 bg-white rounded-lg border border-neutral-200 shadow-sm">
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* 救護案件總數 */}
             <div className="flex items-center justify-between p-3 rounded-md bg-blue-50 border border-blue-100">
               <div className="flex items-center">
@@ -267,6 +267,51 @@ export default function StatsPage() {
                 <div>
                   <h3 className="text-sm font-medium text-neutral-500">當月救護案件總數</h3>
                   <p className="text-2xl font-bold text-blue-600">{rescueList?.length || 0} 件</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* ALS 統計 */}
+            <div className="flex items-center justify-between p-3 rounded-md bg-red-50 border border-red-100">
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-red-500 text-white mr-3">
+                  <ChevronRight className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-neutral-500">高級救護 (ALS)</h3>
+                  <p className="text-2xl font-bold text-red-600">
+                    {rescueList?.filter(rescue => rescue.rescueType === "高級救護 (ALS)").length || 0} 件
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* BLS 統計 */}
+            <div className="flex items-center justify-between p-3 rounded-md bg-green-50 border border-green-100">
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-green-500 text-white mr-3">
+                  <ChevronRight className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-neutral-500">基本救護 (BLS)</h3>
+                  <p className="text-2xl font-bold text-green-600">
+                    {rescueList?.filter(rescue => rescue.rescueType === "基本救護 (BLS)").length || 0} 件
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* PUA 統計 */}
+            <div className="flex items-center justify-between p-3 rounded-md bg-amber-50 border border-amber-100">
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-amber-500 text-white mr-3">
+                  <ChevronRight className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-neutral-500">公用救護 (PUA)</h3>
+                  <p className="text-2xl font-bold text-amber-600">
+                    {rescueList?.filter(rescue => rescue.rescueType === "公用救護 (PUA)").length || 0} 件
+                  </p>
                 </div>
               </div>
             </div>
