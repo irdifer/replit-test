@@ -179,8 +179,14 @@ async function fetchRescueRecordsForSync() {
     orderBy: [desc(rescues.timestamp)],
   });
   
+  // 排除3Bug帳號的資料
+  const filteredResults = result.filter(record => 
+    !record.user.name.toLowerCase().includes('3bug') && 
+    !record.user.username?.toLowerCase().includes('3bug')
+  );
+  
   // 轉換為所需格式
-  return result.map(record => ({
+  return filteredResults.map(record => ({
     name: record.user.name,
     time: formatInTimeZone(new Date(record.timestamp), 'Asia/Taipei', 'yyyy-MM-dd HH:mm'),
     caseType: record.caseType,

@@ -386,9 +386,27 @@ export default function AdminPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isRegistered ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                            {volunteer.isRegistered ? "已註冊" : "未註冊"}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isRegistered ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                              已註冊
+                            </span>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                updateVolunteerMutation.mutate({ 
+                                  id: volunteer.id, 
+                                  data: { isRegistered: !volunteer.isRegistered } 
+                                });
+                                setTimeout(() => {
+                                  refetchVolunteers();
+                                }, 300);
+                              }}
+                              className="h-6 px-2 py-0"
+                            >
+                              更新
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>{volunteer.username || "-"}</TableCell>
                         <TableCell className="max-w-[150px] truncate" title={volunteer.notes || ""}>
