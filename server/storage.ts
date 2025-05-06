@@ -418,6 +418,37 @@ export class DatabaseStorage implements IStorage {
     return rescue;
   }
   
+  // Volunteer 方法實現
+  async getVolunteers(): Promise<Volunteer[]> {
+    return await db.select().from(volunteers).orderBy(volunteers.name);
+  }
+  
+  async getVolunteer(id: number): Promise<Volunteer | undefined> {
+    const [volunteer] = await db.select().from(volunteers).where(eq(volunteers.id, id));
+    return volunteer || undefined;
+  }
+  
+  async createVolunteer(insertVolunteer: InsertVolunteer): Promise<Volunteer> {
+    const [volunteer] = await db
+      .insert(volunteers)
+      .values(insertVolunteer)
+      .returning();
+    return volunteer;
+  }
+  
+  async updateVolunteer(id: number, updateData: Partial<InsertVolunteer>): Promise<Volunteer> {
+    const [volunteer] = await db
+      .update(volunteers)
+      .set(updateData)
+      .where(eq(volunteers.id, id))
+      .returning();
+    return volunteer;
+  }
+  
+  async deleteVolunteer(id: number): Promise<void> {
+    await db.delete(volunteers).where(eq(volunteers.id, id));
+  }
+  
   // Stats methods
   async getUserStats(userId: number): Promise<Stats> {
     // 檢查是否為測試帳號
