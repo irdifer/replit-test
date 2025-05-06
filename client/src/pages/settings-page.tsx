@@ -175,6 +175,16 @@ export default function SettingsPage() {
                 
                 <Button
                   onClick={() => {
+                    // 判斷是否是受限制帳號(emt_3bug)，且非管理員
+                    if (user?.username === "emt_3bug" && user?.role !== "admin") {
+                      toast({
+                        title: "無法更新密碼",
+                        description: "此帳號的密碼僅管理員可修改",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
                     if (!currentPassword) {
                       toast({
                         title: "請輸入當前密碼",
@@ -214,7 +224,7 @@ export default function SettingsPage() {
                       newPassword 
                     });
                   }}
-                  disabled={updateUserMutation.isPending}
+                  disabled={updateUserMutation.isPending || (user?.username === "emt_3bug" && user?.role !== "admin")}
                   className="w-full"
                 >
                   {updateUserMutation.isPending ? "處理中..." : "更新密碼"}
