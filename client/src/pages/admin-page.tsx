@@ -289,8 +289,10 @@ export default function AdminPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="隊員">隊員</SelectItem>
+                        <SelectItem value="小隊長">小隊長</SelectItem>
                         <SelectItem value="副分隊長">副分隊長</SelectItem>
                         <SelectItem value="分隊長">分隊長</SelectItem>
+                        <SelectItem value="助理幹事">助理幹事</SelectItem>
                         <SelectItem value="隊員承辦人">隊員承辦人</SelectItem>
                       </SelectContent>
                     </Select>
@@ -485,8 +487,10 @@ export default function AdminPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="隊員">隊員</SelectItem>
+                    <SelectItem value="小隊長">小隊長</SelectItem>
                     <SelectItem value="副分隊長">副分隊長</SelectItem>
                     <SelectItem value="分隊長">分隊長</SelectItem>
+                    <SelectItem value="助理幹事">助理幹事</SelectItem>
                     <SelectItem value="隊員承辦人">隊員承辦人</SelectItem>
                   </SelectContent>
                 </Select>
