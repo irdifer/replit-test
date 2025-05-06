@@ -214,17 +214,7 @@ export default function StatsPage() {
                       </TableBody>
                     </Table>
                   </div>
-                  <div className="flex justify-center">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={exportActivitiesToExcel}
-                      className="flex items-center gap-1"
-                    >
-                      <Download className="h-4 w-4" />
-                      匯出 Excel
-                    </Button>
-                  </div>
+
                 </div>
               )}
             </CardContent>
@@ -314,19 +304,41 @@ export default function StatsPage() {
                       </Table>
                     )}
                   </div>
-                  <div className="flex justify-center">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={exportRescuesToExcel}
-                      className="flex items-center gap-1"
-                    >
-                      <Download className="h-4 w-4" />
-                      匯出 Excel
-                    </Button>
-                  </div>
+
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 匯出功能區 */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={exportActivitiesToExcel}
+                className="flex items-center gap-1 mx-auto"
+                disabled={!monthlyActivities || monthlyActivities.length === 0}
+              >
+                <Download className="h-4 w-4" />
+                匯出協勤記錄 Excel
+              </Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={exportRescuesToExcel}
+                className="flex items-center gap-1 mx-auto"
+                disabled={!rescueList || rescueList.length === 0}
+              >
+                <Download className="h-4 w-4" />
+                匯出救護案件 Excel
+              </Button>
             </CardContent>
           </Card>
         </div>
