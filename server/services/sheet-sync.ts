@@ -179,11 +179,16 @@ async function fetchRescueRecordsForSync() {
     orderBy: [desc(rescues.timestamp)],
   });
   
-  // 排除3Bug帳號的資料
-  const filteredResults = result.filter(record => 
-    !record.user.name.toLowerCase().includes('3bug') && 
-    !record.user.username?.toLowerCase().includes('3bug')
-  );
+  // 排除特定帳號的資料 (3Bug 和 朱昶達)
+  const EXCLUDED_ACCOUNTS = ['3bug', '朱昶達'];
+  
+  const filteredResults = result.filter(record => {
+    // 檢查用戶名和姓名是否包含在排除列表中
+    return !EXCLUDED_ACCOUNTS.some(excludedName => 
+      record.user.name.includes(excludedName) || 
+      record.user.username?.toLowerCase().includes(excludedName.toLowerCase())
+    );
+  });
   
   // 轉換為所需格式
   return filteredResults.map(record => ({
@@ -203,11 +208,16 @@ async function fetchActivityRecordsForSync() {
   // 獲取所有使用者
   const users = await db.query.users.findMany();
   
-  // 過濾掉3Bug帳號
-  const filteredUsers = users.filter(user => 
-    !user.name.toLowerCase().includes('3bug') && 
-    !user.username.toLowerCase().includes('3bug')
-  );
+  // 排除特定帳號的資料 (3Bug 和 朱昶達)
+  const EXCLUDED_ACCOUNTS = ['3bug', '朱昶達'];
+  
+  const filteredUsers = users.filter(user => {
+    // 檢查用戶名和姓名是否包含在排除列表中
+    return !EXCLUDED_ACCOUNTS.some(excludedName => 
+      user.name.includes(excludedName) || 
+      user.username.toLowerCase().includes(excludedName.toLowerCase())
+    );
+  });
   
   // 收集所有使用者的協勤時數紀錄
   const results = [];
