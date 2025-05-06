@@ -348,18 +348,7 @@ export default function StatsPage() {
           </div>
         )}
 
-        {isAdmin && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">管理員統計資料</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-neutral-600">
-                管理員可以查看所有志工的協勤統計與救護案件。此功能正在開發中，敬請期待。
-              </p>
-            </CardContent>
-          </Card>
-        )}
+
       </main>
     </div>
   );
