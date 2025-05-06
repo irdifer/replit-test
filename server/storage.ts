@@ -42,6 +42,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  getAllUsers(): Promise<User[]>;
   
   // Volunteer management methods
   getVolunteers(): Promise<Volunteer[]>;
@@ -55,13 +56,16 @@ export interface IStorage {
   getUserDailyActivities(userId: number): Promise<DailyActivity>;
   getUserRecentActivities(userId: number): Promise<Activity[]>;
   getUserMonthlyActivities(userId: number): Promise<MonthlyActivity[]>;
+  getAllUsersMonthlyActivities(): Promise<(MonthlyActivity & { userId: number, userName: string })[]>;
   
   // Rescue methods
   createRescue(rescue: InsertRescue): Promise<Rescue>;
   getUserRescuesList(userId: number): Promise<RescueListItem[]>;
+  getAllUsersRescuesList(): Promise<(RescueListItem & { userId: number, userName: string })[]>;
   
   // Stats methods
   getUserStats(userId: number): Promise<Stats>;
+  getAllUsersStats(): Promise<(Stats & { userId: number, userName: string })[]>;
   
   // Session store
   sessionStore: any; // session.Store;
