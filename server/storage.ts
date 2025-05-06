@@ -41,6 +41,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
   
   // Volunteer management methods
   getVolunteers(): Promise<Volunteer[]>;
@@ -97,6 +98,15 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values(values)
+      .returning();
+    return user;
+  }
+  
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set(userData)
+      .where(eq(users.id, id))
       .returning();
     return user;
   }

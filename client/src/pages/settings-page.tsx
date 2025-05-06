@@ -7,11 +7,50 @@ import { HomeIcon, SettingsIcon } from "@/components/ui/icons";
 import UserMenu from "@/components/user-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [name, setName] = useState(user?.name || "");
   const [username, setUsername] = useState(user?.username || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // 用戶信息更新的 mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: { username?: string; currentPassword?: string; newPassword?: string }) => {
+      const response = await apiRequest("PATCH", "/api/user", data);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "更新失敗");
+      }
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "更新成功",
+        description: "您的用戶信息已成功更新",
+      });
+      // 清空密碼字段
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      
+      // 刷新用戶數據
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "更新失敗",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <div className="bg-neutral-50 text-neutral-800 min-h-screen pb-16 md:pb-0 overflow-auto">
@@ -72,31 +111,109 @@ export default function SettingsPage() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="請輸入用戶名"
-                    readOnly
-                    className="bg-neutral-50"
                   />
-                  <p className="text-xs text-neutral-500">用戶名由管理員設定，無法自行修改</p>
+                  <p className="text-xs text-neutral-500">用戶名用於登入系統，請使用英文字母和數字</p>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">密碼修改</Label>
+                <Label htmlFor="current-password">當前密碼</Label>
+                <Input 
+                  id="current-password" 
+                  type="password"
+                  placeholder="請輸入當前密碼"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="new-password">新密碼</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input 
-                    id="password" 
+                    id="new-password" 
                     type="password"
                     placeholder="請輸入新密碼"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                   />
                   <Input 
                     id="confirm-password" 
                     type="password"
                     placeholder="請再次輸入新密碼"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                 </div>
-                <div className="flex justify-end mt-2">
-                  <Button disabled>更改密碼</Button>
-                </div>
-                <p className="text-xs text-neutral-500">密碼修改功能正在開發中，敬請期待</p>
+                <p className="text-xs text-neutral-500">密碼長度應至少為6個字符</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <Button
+                  onClick={() => {
+                    if (username !== user?.username) {
+                      updateUserMutation.mutate({ username });
+                    } else {
+                      toast({
+                        title: "請注意",
+                        description: "用戶名未變更",
+                        variant: "default",
+                      });
+                    }
+                  }}
+                  disabled={updateUserMutation.isPending || username === user?.username || !username}
+                  className="w-full"
+                  variant="outline"
+                >
+                  {updateUserMutation.isPending ? "處理中..." : "更新用戶名"}
+                </Button>
+                
+                <Button
+                  onClick={() => {
+                    if (!currentPassword) {
+                      toast({
+                        title: "請輸入當前密碼",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    if (!newPassword) {
+                      toast({
+                        title: "請輸入新密碼",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    if (newPassword.length < 6) {
+                      toast({
+                        title: "密碼太短",
+                        description: "密碼長度應至少為6個字符",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    if (newPassword !== confirmPassword) {
+                      toast({
+                        title: "密碼不匹配",
+                        description: "兩次輸入的新密碼不一致",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    updateUserMutation.mutate({ 
+                      currentPassword, 
+                      newPassword 
+                    });
+                  }}
+                  disabled={updateUserMutation.isPending}
+                  className="w-full"
+                >
+                  {updateUserMutation.isPending ? "處理中..." : "更新密碼"}
+                </Button>
               </div>
             </div>
           </CardContent>
