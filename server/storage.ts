@@ -37,6 +37,8 @@ export type RescueListItem = {
   treatment: string | null;
   hospital: string | null; // 送達醫院欄位
   rescueType: string | null; // ALS, BLS, PUA救護類別
+  startTime: string | null; // 出勤時間
+  endTime: string | null; // 返隊時間
   id: number;
 };
 
@@ -449,6 +451,8 @@ export class DatabaseStorage implements IStorage {
       treatment: rescue.treatment,
       hospital: rescue.hospital,
       rescueType: rescue.rescueType,
+      startTime: rescue.startTime,
+      endTime: rescue.endTime,
       id: rescue.id
     }));
     
@@ -731,6 +735,8 @@ export class DatabaseStorage implements IStorage {
       treatment: rescue.treatment,
       hospital: rescue.hospital,
       rescueType: rescue.rescueType,
+      startTime: rescue.startTime,
+      endTime: rescue.endTime,
       id: rescue.id,
       userId: rescue.userId,
       userName: rescue.user.name

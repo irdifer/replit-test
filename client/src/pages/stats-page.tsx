@@ -41,6 +41,8 @@ type RescueListItem = {
   treatment: string | null;
   hospital: string | null; // 新增送達醫院欄位
   rescueType: string | null; // ALS, BLS, PUA
+  startTime: string | null; // 出勤時間
+  endTime: string | null; // 返隊時間
   id: number;
   userId?: number; // 僅管理員視圖中存在
   userName?: string; // 僅管理員視圖中存在
@@ -550,6 +552,7 @@ export default function StatsPage() {
                             {isAdmin && <TableHead className="w-[100px]">隊員</TableHead>}
                             <TableHead className="w-[100px]">日期</TableHead>
                             <TableHead className="w-[80px]">出勤時間</TableHead>
+                            <TableHead className="w-[80px]">返隊時間</TableHead>
                             <TableHead className="w-[100px]">救護類別</TableHead>
                             <TableHead className="w-[120px]">案件類型</TableHead>
                             <TableHead className="w-[60px]">詳細</TableHead>
