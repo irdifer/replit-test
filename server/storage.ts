@@ -447,6 +447,7 @@ export class DatabaseStorage implements IStorage {
       caseSubtype: rescue.caseSubtype,
       treatment: rescue.treatment,
       hospital: rescue.hospital,
+      rescueType: rescue.rescueType,
       id: rescue.id
     }));
     
@@ -467,6 +468,7 @@ export class DatabaseStorage implements IStorage {
           caseSubtype: insertRescue.caseSubtype || null,
           treatment: insertRescue.treatment || null,
           hospital: insertRescue.hospital || null,
+          rescueType: insertRescue.rescueType || null,
           startTime: insertRescue.startTime || null,
           endTime: insertRescue.endTime || null,
           woundLength: insertRescue.woundLength || null,
@@ -727,6 +729,7 @@ export class DatabaseStorage implements IStorage {
       caseSubtype: rescue.caseSubtype,
       treatment: rescue.treatment,
       hospital: rescue.hospital,
+      rescueType: rescue.rescueType,
       id: rescue.id,
       userId: rescue.userId,
       userName: rescue.user.name
