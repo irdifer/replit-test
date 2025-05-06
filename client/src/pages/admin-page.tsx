@@ -280,13 +280,20 @@ export default function AdminPage() {
                   
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="position" className="text-right">職位</Label>
-                    <Input
-                      id="position"
-                      name="position"
+                    <Select
                       value={formData.position || "隊員"}
-                      onChange={handleInputChange}
-                      className="col-span-3"
-                    />
+                      onValueChange={handlePositionChange}
+                    >
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="選擇職位" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="隊員">隊員</SelectItem>
+                        <SelectItem value="副分隊長">副分隊長</SelectItem>
+                        <SelectItem value="分隊長">分隊長</SelectItem>
+                        <SelectItem value="志工承辦人">志工承辦人</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -348,6 +355,8 @@ export default function AdminPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>姓名</TableHead>
+                      <TableHead>EMT等級</TableHead>
+                      <TableHead>身分</TableHead>
                       <TableHead>管理權限</TableHead>
                       <TableHead>已註冊</TableHead>
                       <TableHead>用戶名</TableHead>
@@ -358,10 +367,20 @@ export default function AdminPage() {
                   <TableBody>
                     {volunteers.map((volunteer) => (
                       <TableRow key={volunteer.id}>
-                        <TableCell className="font-medium">{volunteer.name}-{volunteer.teamType || "T1"}-{volunteer.position || "隊員"}</TableCell>
+                        <TableCell className="font-medium">{volunteer.name}</TableCell>
+                        <TableCell>
+                          <span className="px-2 py-1 text-xs rounded-full bg-neutral-100 text-neutral-800">
+                            {volunteer.teamType || "T1"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="px-2 py-1 text-xs rounded-full bg-neutral-100 text-neutral-800">
+                            {volunteer.position || "隊員"}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isAdmin ? "bg-blue-100 text-blue-800" : "bg-neutral-100 text-neutral-800"}`}>
-                            {volunteer.isAdmin ? "管理員" : "隊員"}
+                            {volunteer.isAdmin ? "管理員" : "一般"}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -457,13 +476,20 @@ export default function AdminPage() {
               
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-position" className="text-right">職位</Label>
-                <Input
-                  id="edit-position"
-                  name="position"
+                <Select
                   value={formData.position || "隊員"}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                />
+                  onValueChange={handlePositionChange}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="選擇職位" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="隊員">隊員</SelectItem>
+                    <SelectItem value="副分隊長">副分隊長</SelectItem>
+                    <SelectItem value="分隊長">分隊長</SelectItem>
+                    <SelectItem value="志工承辦人">志工承辦人</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="grid grid-cols-4 items-center gap-4">
