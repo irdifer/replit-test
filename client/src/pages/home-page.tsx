@@ -10,6 +10,7 @@ import RescueRecord from "@/components/rescue-record";
 import StatsSummary from "@/components/stats-summary";
 import RecentActivity from "@/components/recent-activity";
 import MobileNavigation from "@/components/mobile-navigation";
+import UserMenu from "@/components/user-menu";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -102,9 +103,7 @@ export default function HomePage() {
               </h1>
               <h2 className="text-sm text-neutral-500 font-medium">協勤 / 退勤 / 救護記錄系統</h2>
             </div>
-            <button className="p-2 rounded-full hover:bg-neutral-100" aria-label="個人資料">
-              <span className="material-icons text-neutral-600">account_circle</span>
-            </button>
+            <UserMenu />
           </div>
         </div>
       </header>
