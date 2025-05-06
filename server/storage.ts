@@ -154,14 +154,19 @@ export class DatabaseStorage implements IStorage {
         )
       );
     
-    // Find sign in and sign out times
-    const signInActivity = userTodayActivities.find(a => a.type === "signin");
-    const signOutActivity = userTodayActivities.find(a => a.type === "signout");
+    // 按照時間戳排序，這樣我們可以獲取最新的記錄
+    const sortedActivities = [...userTodayActivities].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    // 找到最新的簽到和簽退記錄
+    const latestSignIn = sortedActivities.find(a => a.type === "signin");
+    const latestSignOut = sortedActivities.find(a => a.type === "signout");
     
     return {
-      signInTime: signInActivity ? formatInTimeZone(new Date(signInActivity.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
-      signOutTime: signOutActivity ? formatInTimeZone(new Date(signOutActivity.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
-      signOutIP: signOutActivity ? signOutActivity.ip : null,
+      signInTime: latestSignIn ? formatInTimeZone(new Date(latestSignIn.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
+      signOutTime: latestSignOut ? formatInTimeZone(new Date(latestSignOut.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
+      signOutIP: latestSignOut ? latestSignOut.ip : null,
     };
   }
   
@@ -239,25 +244,51 @@ export class DatabaseStorage implements IStorage {
       .orderBy(activities.timestamp);
     
     // 按日期分組活動
-    const activitiesByDay = new Map<string, { 
-      date: string, 
-      signIn?: Date, 
-      signInStr?: string, 
-      signOut?: Date, 
-      signOutStr?: string, 
-      duration: number 
-    }>();
+    type DailyActivityEntry = {
+      date: string;
+      signIn?: Date;
+      signInStr?: string;
+      signOut?: Date;
+      signOutStr?: string;
+      duration: number;
+    };
+    const activitiesByDay = new Map<string, DailyActivityEntry>();
     
-    // 處理每一個活動記錄
-    userActivities.forEach(activity => {
+    // 按日期分組活動
+    const activitiesByDate = userActivities.reduce((acc, activity) => {
       const date = formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd");
-      const entry = activitiesByDay.get(date) || { date, duration: 0 };
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(activity);
+      return acc;
+    }, {} as Record<string, Activity[]>);
+    
+    // 處理每一天的活動記錄
+    Object.entries(activitiesByDate).forEach(([date, dailyActivities]) => {
+      // 依照時間戳排序，以便取得最新的記錄
+      const sortedActivities = [...dailyActivities].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
       
-      if (activity.type === "signin") {
-        entry.signIn = new Date(activity.timestamp);
+      // 找到最新的簽到和簽退記錄
+      const latestSignIn = sortedActivities.find(a => a.type === "signin");
+      const latestSignOut = sortedActivities.find(a => a.type === "signout");
+      
+      const entry: {
+        date: string;
+        duration: number;
+        signIn?: Date;
+        signInStr?: string;
+        signOut?: Date;
+        signOutStr?: string;
+      } = { date, duration: 0 };
+      
+      if (latestSignIn) {
+        entry.signIn = new Date(latestSignIn.timestamp);
         entry.signInStr = formatInTimeZone(entry.signIn, TAIWAN_TIMEZONE, "HH:mm");
-      } else if (activity.type === "signout") {
-        entry.signOut = new Date(activity.timestamp);
+      }
+      
+      if (latestSignOut) {
+        entry.signOut = new Date(latestSignOut.timestamp);
         entry.signOutStr = formatInTimeZone(entry.signOut, TAIWAN_TIMEZONE, "HH:mm");
       }
       
@@ -413,21 +444,38 @@ export class DatabaseStorage implements IStorage {
     // Calculate work hours
     let workHours = 0;
     
-    // Group activities by day
+    // 按日期分組活動
+    const activitiesByDate = userActivities.reduce((acc, activity) => {
+      const date = formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd");
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(activity);
+      return acc;
+    }, {} as Record<string, Activity[]>);
+    
+    // Group activities by day with latest sign in/out time
     const activitiesByDay = new Map<string, { signIn?: Date, signOut?: Date }>();
     
-    userActivities.forEach(activity => {
-      // 使用台灣時區格式化日期
-      const day = formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd");
-      const entry = activitiesByDay.get(day) || {};
+    Object.entries(activitiesByDate).forEach(([date, dailyActivities]) => {
+      // 依照時間戳排序，以便取得最新的記錄
+      const sortedActivities = [...dailyActivities].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
       
-      if (activity.type === "signin") {
-        entry.signIn = new Date(activity.timestamp);
-      } else if (activity.type === "signout") {
-        entry.signOut = new Date(activity.timestamp);
+      // 找到最新的簽到和簽退記錄
+      const latestSignIn = sortedActivities.find(a => a.type === "signin");
+      const latestSignOut = sortedActivities.find(a => a.type === "signout");
+      
+      const entry = { } as { signIn?: Date, signOut?: Date };
+      
+      if (latestSignIn) {
+        entry.signIn = new Date(latestSignIn.timestamp);
       }
       
-      activitiesByDay.set(day, entry);
+      if (latestSignOut) {
+        entry.signOut = new Date(latestSignOut.timestamp);
+      }
+      
+      activitiesByDay.set(date, entry);
     });
     
     // Calculate hours for each day
