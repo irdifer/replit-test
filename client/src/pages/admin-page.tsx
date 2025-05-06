@@ -48,9 +48,10 @@ export default function AdminPage() {
   }
   
   // 獲取志工名單
-  const { data: volunteers = [], isLoading, error } = useQuery<Volunteer[]>({
+  const { data: volunteers = [], isLoading, error, refetch: refetchVolunteers } = useQuery<Volunteer[]>({
     queryKey: ["/api/volunteers"],
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000, // 每30秒自動重新獲取一次
   });
   
   // 新增志工
@@ -108,10 +109,12 @@ export default function AdminPage() {
       await apiRequest("DELETE", `/api/volunteers/${id}`);
     },
     onSuccess: () => {
+      // 立即重新現取志工名單
       queryClient.invalidateQueries({ queryKey: ["/api/volunteers"] });
+      queryClient.refetchQueries({ queryKey: ["/api/volunteers"] });
       toast({
         title: "刪除成功",
-        description: "已成功刪除志工",
+        description: "已成功刪除隊員",
       });
     },
     onError: (error: Error) => {
