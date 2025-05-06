@@ -58,6 +58,9 @@ export default function StatsPage() {
   // 月份選擇器狀態
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
+  
+  // 可用月份數據狀態
+  const [availableMonths, setAvailableMonths] = useState<{year: number, months: number[]}[]>([]);
 
   // 切換救護案件詳細信息顯示
   const toggleRescueDetails = (id: number) => {
@@ -72,14 +75,23 @@ export default function StatsPage() {
   
   // 處理月份變更
   const handleMonthChange = (newMonth: number) => {
+    if (newMonth === -1) return; // 當選擇「無可用資料」時不執行任何動作
     setSelectedMonth(newMonth);
-    // 在這裡可以加入重新載入資料的邏輯
   };
   
   // 處理年份變更
   const handleYearChange = (newYear: number) => {
     setSelectedYear(newYear);
-    // 在這裡可以加入重新載入資料的邏輯
+    
+    // 檢查所選年份是否有月份數據
+    const yearData = availableMonths.find(y => y.year === newYear);
+    if (yearData && yearData.months.length > 0) {
+      // 選擇第一個可用的月份
+      setSelectedMonth(yearData.months[0]);
+    } else {
+      // 如果這個年份沒有可用月份，設置為-1表示無月份可選
+      setSelectedMonth(-1);
+    }
   };
   
   // 格式化日期，只顯示月和日
@@ -95,6 +107,42 @@ export default function StatsPage() {
     }
   };
   
+  // 獲取可用的月份資料
+  const { data: availableMonthsData, isLoading: availableMonthsLoading } = useQuery<{year: number, months: number[]}[]>({    
+    queryKey: ["/api/available-months", isAdmin],
+    queryFn: async () => {
+      try {
+        // 實際的API請求 - 若已完成API可以使用下面的請求
+        // const url = isAdmin ? '/api/available-months?all=true' : '/api/available-months';
+        // const res = await fetch(url);
+        // if (!res.ok) throw new Error('Failed to fetch available months');
+        // return res.json();
+
+        // 模擬數據 - 待API完成後可刪除
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+        
+        return [
+          { year: currentYear, months: [4, 5, currentMonth] }, // 假設當前年有資料的月份
+          { year: currentYear-1, months: [11, 12] } // 去年的月份
+        ];
+      } catch(error) {
+        console.error("Error fetching available months:", error);
+        // 發生錯誤時返回當前年月作為預設值
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+        return [{ year: currentYear, months: [currentMonth] }];
+      }
+    }
+  });
+  
+  // 當有新的可用月份數據時更新狀態
+  React.useEffect(() => {
+    if (availableMonthsData) {
+      setAvailableMonths(availableMonthsData);
+    }
+  }, [availableMonthsData]);
+
   // 獲取月度活動記錄
   const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
     queryKey: ["/api/activities/monthly", isAdmin, selectedYear, selectedMonth],
@@ -373,8 +421,11 @@ export default function StatsPage() {
             >
               {activitiesLoading ? (
                 <div className="py-4 text-center text-neutral-500">正在加載活動記錄...</div>
-              ) : !monthlyActivities || monthlyActivities.length === 0 ? (
-                <div className="py-4 text-center text-neutral-500">本月尚無協勤記錄</div>
+              ) : !monthlyActivities || monthlyActivities.length === 0 || selectedMonth === -1 ? (
+                <div className="py-4 text-center text-neutral-500 flex flex-col items-center gap-2">
+                  <div className="text-3xl">📅</div>
+                  <div>{selectedMonth === -1 ? '選擇的年份無資料' : '所選月份無協勤記錄'}</div>
+                </div>
               ) : (
                 <div>
                   <div className="rounded-md border mb-4">
@@ -435,8 +486,11 @@ export default function StatsPage() {
             >
               {rescueLoading ? (
                 <div className="py-4 text-center text-neutral-500">正在加載救護案件...</div>
-              ) : !rescueList || rescueList.length === 0 ? (
-                <div className="py-4 text-center text-neutral-500">本月尚無救護案件記錄</div>
+              ) : !rescueList || rescueList.length === 0 || selectedMonth === -1 ? (
+                <div className="py-4 text-center text-neutral-500 flex flex-col items-center gap-2">
+                  <div className="text-3xl">💉</div>
+                  <div>{selectedMonth === -1 ? '選擇的年份無資料' : '所選月份無救護案件記錄'}</div>
+                </div>
               ) : (
                 <div>
                   <div className="rounded-md border mb-4">
@@ -502,56 +556,54 @@ export default function StatsPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {rescueList.map((rescue) => {
-                            return (
-                              <React.Fragment key={rescue.id}>
-                                <TableRow 
-                                  onClick={() => toggleRescueDetails(rescue.id)}
-                                  className="cursor-pointer hover:bg-neutral-50"
-                                >
-                                  {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
-                                  <TableCell className="font-medium">{formatDateMonthDay(rescue.date)}</TableCell>
-                                  <TableCell>{rescue.time}</TableCell>
-                                  <TableCell>
-                                    <span className={`px-2 py-0.5 rounded-full text-xs ${
-                                      rescue.rescueType === "高級救護 (ALS)" ? "bg-red-100 text-red-800" : 
-                                      rescue.rescueType === "基本救護 (BLS)" ? "bg-green-100 text-green-800" : 
-                                      rescue.rescueType === "公用救護 (PUA)" ? "bg-amber-100 text-amber-800" : 
-                                      "bg-gray-100 text-gray-800"
-                                    }`}>
-                                      {rescue.rescueType || '未指定'}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell>{rescue.caseType}</TableCell>
-                                  <TableCell>
-                                    {expandedRescues.includes(rescue.id) ? 
-                                      <ChevronDown className="h-5 w-5 text-neutral-400" /> : 
-                                      <ChevronRight className="h-5 w-5 text-neutral-400" />}
+                          {rescueList.map((rescue) => (
+                            <React.Fragment key={`rescue-${rescue.id}`}>
+                              <TableRow 
+                                onClick={() => toggleRescueDetails(rescue.id)}
+                                className="cursor-pointer hover:bg-neutral-50"
+                              >
+                                {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
+                                <TableCell className="font-medium">{formatDateMonthDay(rescue.date)}</TableCell>
+                                <TableCell>{rescue.time}</TableCell>
+                                <TableCell>
+                                  <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                    rescue.rescueType === "高級救護 (ALS)" ? "bg-red-100 text-red-800" : 
+                                    rescue.rescueType === "基本救護 (BLS)" ? "bg-green-100 text-green-800" : 
+                                    rescue.rescueType === "公用救護 (PUA)" ? "bg-amber-100 text-amber-800" : 
+                                    "bg-gray-100 text-gray-800"
+                                  }`}>
+                                    {rescue.rescueType || '未指定'}
+                                  </span>
+                                </TableCell>
+                                <TableCell>{rescue.caseType}</TableCell>
+                                <TableCell>
+                                  {expandedRescues.includes(rescue.id) ? 
+                                    <ChevronDown className="h-5 w-5 text-neutral-400" /> : 
+                                    <ChevronRight className="h-5 w-5 text-neutral-400" />}
+                                </TableCell>
+                              </TableRow>
+                              {expandedRescues.includes(rescue.id) && (
+                                <TableRow className="bg-neutral-50">
+                                  <TableCell colSpan={isAdmin ? 7 : 6} className="p-3">
+                                    <div className="grid grid-cols-2 gap-3 text-sm">
+                                      <div>
+                                        <span className="font-medium">案件子類型: </span>
+                                        {rescue.caseSubtype || '-'}
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">送達醫院: </span>
+                                        {rescue.hospital || '-'}
+                                      </div>
+                                      <div className="col-span-2">
+                                        <span className="font-medium">基本處置: </span>
+                                        {rescue.treatment || '-'}
+                                      </div>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
-                                {expandedRescues.includes(rescue.id) && (
-                                  <TableRow className="bg-neutral-50">
-                                    <TableCell colSpan={isAdmin ? 7 : 6} className="p-3">
-                                      <div className="grid grid-cols-2 gap-3 text-sm">
-                                        <div>
-                                          <span className="font-medium">案件子類型: </span>
-                                          {rescue.caseSubtype || '-'}
-                                        </div>
-                                        <div>
-                                          <span className="font-medium">送達醫院: </span>
-                                          {rescue.hospital || '-'}
-                                        </div>
-                                        <div className="col-span-2">
-                                          <span className="font-medium">基本處置: </span>
-                                          {rescue.treatment || '-'}
-                                        </div>
-                                      </div>
-                                    </TableCell>
-                                  </TableRow>
-                                )}
-                              </React.Fragment>
-                            );
-                          })}
+                              )}
+                            </React.Fragment>
+                          ))}
                         </TableBody>
                       </Table>
                     )}
@@ -574,9 +626,13 @@ export default function StatsPage() {
                 value={selectedYear}
                 onChange={(e) => handleYearChange(parseInt(e.target.value))}
               >
-                {Array.from({ length: 5 }, (_, i) => 2025 - i).map(year => (
-                  <option key={year} value={year}>{year}年</option>
-                ))}
+                {availableMonthsLoading ? (
+                  <option value={new Date().getFullYear()}>{new Date().getFullYear()}年</option>
+                ) : (
+                  availableMonths?.map(yearData => (
+                    <option key={yearData.year} value={yearData.year}>{yearData.year}年</option>
+                  ))
+                )}
               </select>
             </div>
             <div>
@@ -585,10 +641,22 @@ export default function StatsPage() {
                 className="w-full p-2 border border-neutral-300 rounded-md bg-white"
                 value={selectedMonth}
                 onChange={(e) => handleMonthChange(parseInt(e.target.value))}
+                disabled={availableMonthsLoading}
               >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                  <option key={month} value={month}>{month}月</option>
-                ))}
+                {availableMonthsLoading ? (
+                  <option value={new Date().getMonth() + 1}>{new Date().getMonth() + 1}月</option>
+                ) : (
+                  // 顯示所選年份的可用月份
+                  availableMonths
+                    .find(yearData => yearData.year === selectedYear)?.months
+                    .sort((a, b) => a - b) // 確保月份按照順序排列
+                    .map(month => (
+                      <option key={month} value={month}>{month}月</option>
+                    )) || (
+                      // 如果選擇的年份沒有資料，顯示提示
+                      <option value="-1">無可用資料</option>
+                    )
+                )}
               </select>
             </div>
           </div>
@@ -602,7 +670,7 @@ export default function StatsPage() {
               size="sm" 
               onClick={exportActivitiesToExcel}
               className="flex items-center gap-1 justify-center"
-              disabled={!monthlyActivities || monthlyActivities.length === 0}
+              disabled={!monthlyActivities || monthlyActivities.length === 0 || selectedMonth === -1}
             >
               <Download className="h-4 w-4" />
               匯出協勤紀錄
@@ -612,7 +680,7 @@ export default function StatsPage() {
               size="sm" 
               onClick={exportRescuesToExcel}
               className="flex items-center gap-1 justify-center"
-              disabled={!rescueList || rescueList.length === 0}
+              disabled={!rescueList || rescueList.length === 0 || selectedMonth === -1}
             >
               <Download className="h-4 w-4" />
               匯出救護紀錄
