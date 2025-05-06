@@ -173,4 +173,60 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);
   });
+  
+  // 更新用戶信息
+  app.patch("/api/user", async (req, res, next) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const userId = req.user!.id;
+    const { username, currentPassword, newPassword } = req.body;
+    
+    try {
+      // 如果要變更用戶名，先檢查是否已存在
+      if (username && username !== req.user!.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(400).json({ error: "用戶名已被使用" });
+        }
+      }
+      
+      // 如果要修改密碼
+      if (currentPassword && newPassword) {
+        // 驗證當前密碼
+        const isPasswordCorrect = await comparePasswords(currentPassword, req.user!.password);
+        if (!isPasswordCorrect) {
+          return res.status(400).json({ error: "當前密碼不正確" });
+        }
+        
+        // 哈希新密碼
+        const hashedPassword = await hashPassword(newPassword);
+        
+        // 更新用戶資料
+        const updatedUser = await storage.updateUser(userId, {
+          ...(username ? { username } : {}),
+          password: hashedPassword
+        });
+        
+        // 更新會話中的用戶資料
+        req.login(updatedUser, (err) => {
+          if (err) return next(err);
+          return res.json(updatedUser);
+        });
+      } else if (username && username !== req.user!.username) {
+        // 只更新用戶名
+        const updatedUser = await storage.updateUser(userId, { username });
+        
+        // 更新會話中的用戶資料
+        req.login(updatedUser, (err) => {
+          if (err) return next(err);
+          return res.json(updatedUser);
+        });
+      } else {
+        return res.status(400).json({ error: "沒有提供要更新的資料" });
+      }
+    } catch (error) {
+      console.error("更新用戶資料時出錯:", error);
+      return res.status(500).json({ error: "更新用戶資料失敗" });
+    }
+  });
 }
