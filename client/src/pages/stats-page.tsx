@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,7 +176,7 @@ export default function StatsPage() {
   });
   
   // 獲取救護案件列表
-  const { data: rescueList, isLoading: rescueLoading } = useQuery<RescueListItem[]>({
+  const { data: rescueList, isLoading: rescueLoading, refetch: refetchRescues } = useQuery<RescueListItem[]>({
     queryKey: ["/api/rescues/list", isAdmin, selectedYear, selectedMonth],
     queryFn: async ({ queryKey }) => {
       const isAdmin = queryKey[1] as boolean;
@@ -184,16 +184,30 @@ export default function StatsPage() {
       const selectedMonth = queryKey[3] as number;
       const yearMonthParam = `year=${selectedYear}&month=${selectedMonth}`;
       const url = isAdmin 
-        ? `/api/rescues/list?all=true&${yearMonthParam}` 
-        : `/api/rescues/list?${yearMonthParam}`;
+        ? `/api/rescues/list?all=true&${yearMonthParam}&_t=${new Date().getTime()}` 
+        : `/api/rescues/list?${yearMonthParam}&_t=${new Date().getTime()}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch data');
       const data = await res.json();
       
       // 記錄接收到的救護案件數據，特別關注救護類別
       console.log('救護案件列表:', data.length);
+      console.log('獲取救護案件資料時間:', new Date().toLocaleTimeString());
+      
+      // 檢查救護類別分布
+      const alsCount = data.filter((r: RescueListItem) => r.rescueType === '高級救護 (ALS)').length;
+      const blsCount = data.filter((r: RescueListItem) => r.rescueType === '基本救護 (BLS)').length;
+      const puaCount = data.filter((r: RescueListItem) => r.rescueType === '公用救護 (PUA)').length;
+      console.log('救護類別統計:', {
+        '高級救護 (ALS)': alsCount,
+        '基本救護 (BLS)': blsCount,
+        '公用救護 (PUA)': puaCount,
+        '無救護類別': data.filter((r: RescueListItem) => !r.rescueType).length
+      });
+      
       data.forEach((rescue: RescueListItem, index: number) => {
         console.log(`救護案件 #${index+1}:`, {
+          id: rescue.id,
           caseType: rescue.caseType,
           rescueType: rescue.rescueType,
           rawData: rescue
@@ -202,6 +216,8 @@ export default function StatsPage() {
       
       return data;
     },
+    refetchOnWindowFocus: true,
+    staleTime: 30 * 1000, // 30秒內不重新載入
   });
   
   // 匯出月度協勤記錄到Excel
@@ -354,12 +370,36 @@ export default function StatsPage() {
             <ChartIcon className="text-blue-500" />
             統計資料
           </h2>
-          <Link href="/">
-            <Button variant="outline" size="sm" className="flex items-center gap-1.5">
-              <HomeIcon className="h-4 w-4" />
-              返回首頁
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1.5"
+              onClick={() => {
+                // 手動刷新救護記錄和統計數據
+                refetchRescues();
+                toast({
+                  title: '救護資料已刷新',
+                  description: '統計頁面已經更新為最新救護記錄資料',
+                  variant: 'default',
+                });
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw h-4 w-4">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                <path d="M3 21v-5h5"/>
+              </svg>
+              刷新數據
             </Button>
-          </Link>
+            <Link href="/">
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+                <HomeIcon className="h-4 w-4" />
+                返回首頁
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* 月度統計摘要 */}
@@ -387,7 +427,16 @@ export default function StatsPage() {
                 <div>
                   <h3 className="text-sm font-medium text-neutral-500">高級救護 (ALS)</h3>
                   <p className="text-2xl font-bold text-red-600">
-                    {rescueList?.filter(rescue => rescue.rescueType === "高級救護 (ALS)").length || 0} 件
+                    {(() => {
+                      // 增加日誌以查看救護類別數據
+                      if (rescueList) {
+                        const alsRescues = rescueList.filter(rescue => rescue.rescueType === "高級救護 (ALS)");
+                        console.log("ALS救護案件數量:", alsRescues.length);
+                        console.log("ALS救護案件列表:", alsRescues);
+                        return alsRescues.length;
+                      }
+                      return 0;
+                    })()} 件
                   </p>
                 </div>
               </div>
