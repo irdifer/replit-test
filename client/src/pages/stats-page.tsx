@@ -192,18 +192,7 @@ export default function StatsPage() {
                 <div className="py-4 text-center text-neutral-500">本月尚無協勤記錄</div>
               ) : (
                 <div>
-                  <div className="flex justify-end mb-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={exportActivitiesToExcel}
-                      className="flex items-center gap-1"
-                    >
-                      <Download className="h-4 w-4" />
-                      匯出 Excel
-                    </Button>
-                  </div>
-                  <div className="rounded-md border">
+                  <div className="rounded-md border mb-4">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -224,6 +213,17 @@ export default function StatsPage() {
                         ))}
                       </TableBody>
                     </Table>
+                  </div>
+                  <div className="flex justify-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={exportActivitiesToExcel}
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-4 w-4" />
+                      匯出 Excel
+                    </Button>
                   </div>
                 </div>
               )}
@@ -257,18 +257,7 @@ export default function StatsPage() {
                 <div className="py-4 text-center text-neutral-500">本月尚無救護案件記錄</div>
               ) : (
                 <div>
-                  <div className="flex justify-end mb-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={exportRescuesToExcel}
-                      className="flex items-center gap-1"
-                    >
-                      <Download className="h-4 w-4" />
-                      匯出 Excel
-                    </Button>
-                  </div>
-                  <div className="rounded-md border">
+                  <div className="rounded-md border mb-4">
                     {isMobile ? (
                       <div className="divide-y divide-neutral-200">
                         {rescueList.map((rescue) => (
@@ -324,6 +313,17 @@ export default function StatsPage() {
                         </TableBody>
                       </Table>
                     )}
+                  </div>
+                  <div className="flex justify-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={exportRescuesToExcel}
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-4 w-4" />
+                      匯出 Excel
+                    </Button>
                   </div>
                 </div>
               )}
