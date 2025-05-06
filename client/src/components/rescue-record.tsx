@@ -29,6 +29,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
   const [caseType, setCaseType] = useState<string | undefined>();
   const [caseSubtype, setCaseSubtype] = useState<string | undefined>();
   const [treatment, setTreatment] = useState("");
+  const [hospital, setHospital] = useState<string | undefined>(); // 新增送達醫院狀態
   const [showWoundDimensions, setShowWoundDimensions] = useState(false);
   const [woundLength, setWoundLength] = useState("");
   const [woundHeight, setWoundHeight] = useState("");
@@ -45,6 +46,11 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
     緊急救援: ["山域", "水域"],
     打架受傷: ["挫傷", "割傷", "撕裂傷"],
   };
+  
+  // 醫院選項
+  const hospitalOptions = [
+    "拒送", "明顯死亡", "市三", "北市中興", "台大", "北馬", "部北", "淡馬", "八里療養院", "松德療養院", "榕總", "新光", "新店慈濟", "輔大", "台北長康", "林口長康"
+  ];
 
   const quickTags = [
     "生理監視 VS",
