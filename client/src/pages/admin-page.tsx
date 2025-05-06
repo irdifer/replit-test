@@ -229,6 +229,31 @@ export default function AdminPage() {
             管理隊員名單
           </h2>
           <div className="flex gap-2">
+            <Button 
+              onClick={() => {
+                toast({
+                  title: "更新中",
+                  description: "正在更新全部隊員的註冊狀態",
+                });
+                // 將所有的隊員註冊狀態都設為已註冊
+                volunteers.forEach(volunteer => {
+                  if (!volunteer.isRegistered) {
+                    updateVolunteerMutation.mutate({ 
+                      id: volunteer.id, 
+                      data: { isRegistered: true } 
+                    });
+                  }
+                });
+                setTimeout(() => {
+                  refetchVolunteers();
+                }, 500);
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white" 
+              size="sm"
+            >
+              更新隊員狀態
+            </Button>
+            
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-[#58B2DC] hover:bg-[#4B99BD]" size="sm">
@@ -386,27 +411,9 @@ export default function AdminPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isRegistered ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                              已註冊
-                            </span>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                updateVolunteerMutation.mutate({ 
-                                  id: volunteer.id, 
-                                  data: { isRegistered: !volunteer.isRegistered } 
-                                });
-                                setTimeout(() => {
-                                  refetchVolunteers();
-                                }, 300);
-                              }}
-                              className="h-6 px-2 py-0"
-                            >
-                              更新
-                            </Button>
-                          </div>
+                          <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isRegistered ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                            已註冊
+                          </span>
                         </TableCell>
                         <TableCell>{volunteer.username || "-"}</TableCell>
                         <TableCell className="max-w-[150px] truncate" title={volunteer.notes || ""}>
