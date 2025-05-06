@@ -198,6 +198,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      // 首先檢查志工表中是否已存在相同名稱的志工
+      const existingVolunteers = await storage.getVolunteers();
+      const nameExists = existingVolunteers.some(v => v.name === name);
+      if (nameExists) {
+        return res.status(400).json({ message: "Volunteer name already exists" });
+      }
+      
+      // 如果指定了用戶名，檢查用戶表中是否已存在
+      if (username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+      
       const volunteer = await storage.createVolunteer({
         name,
         position: position || "志工",
@@ -209,9 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       return res.status(201).json(volunteer);
     } catch (error) {
-      if (error instanceof Error && error.message.includes("duplicate key")) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
+      console.error("Creating volunteer error:", error);
       return res.status(500).json({ message: "An error occurred" });
     }
   });
@@ -229,6 +242,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { name, position, isAdmin, isRegistered, username, notes } = req.body;
     
     try {
+      // 檢查當前的志工資料
+      const currentVolunteer = await storage.getVolunteer(id);
+      if (!currentVolunteer) {
+        return res.status(404).json({ message: "Volunteer not found" });
+      }
+      
+      // 如果要修改名稱，檢查是否已存在
+      if (name && name !== currentVolunteer.name) {
+        const existingVolunteers = await storage.getVolunteers();
+        const nameExists = existingVolunteers.some(v => v.name === name && v.id !== id);
+        if (nameExists) {
+          return res.status(400).json({ message: "Volunteer name already exists" });
+        }
+      }
+      
+      // 如果要修改用戶名，檢查是否已存在
+      if (username && username !== currentVolunteer.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+      
       const volunteer = await storage.updateVolunteer(id, {
         ...(name && { name }),
         ...(position && { position }),
@@ -240,9 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       return res.json(volunteer);
     } catch (error) {
-      if (error instanceof Error && error.message.includes("duplicate key")) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
+      console.error("Updating volunteer error:", error);
       return res.status(500).json({ message: "An error occurred" });
     }
   });
