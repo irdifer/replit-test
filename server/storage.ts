@@ -386,7 +386,7 @@ export class DatabaseStorage implements IStorage {
     // 將救護案件轉換為列表項目格式
     const rescueList: RescueListItem[] = userRescues.map(rescue => ({
       date: formatInTimeZone(new Date(rescue.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd"),
-      time: formatInTimeZone(new Date(rescue.timestamp), TAIWAN_TIMEZONE, "HH:mm"),
+      time: formatInTimeZone(new Date(rescue.timestamp), TAIWAN_TIMEZONE, "HH:mm"), // 使用24小時制
       caseType: rescue.caseType,
       caseSubtype: rescue.caseSubtype,
       treatment: rescue.treatment,
