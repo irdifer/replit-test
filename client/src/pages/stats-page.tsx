@@ -63,6 +63,19 @@ export default function StatsPage() {
   const currentMonth = format(new Date(), "yyyy 年 M 月", { locale: zhTW });
   const currentMonthFile = format(new Date(), "yyyy-MM", { locale: zhTW });
   
+  // 格式化日期，只顯示月和日
+  const formatDateMonthDay = (dateString: string) => {
+    try {
+      const dateParts = dateString.split('-');
+      if(dateParts.length === 3) {
+        return `${parseInt(dateParts[1])}/${parseInt(dateParts[2])}`;
+      }
+      return dateString;
+    } catch(e) {
+      return dateString;
+    }
+  };
+  
   // 獲取月度活動記錄
   const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
     queryKey: ["/api/activities/monthly", isAdmin],
@@ -237,7 +250,7 @@ export default function StatsPage() {
                         {monthlyActivities.map((activity) => (
                           <TableRow key={isAdmin ? `${activity.userId}-${activity.activityId}-${activity.date}` : `${activity.activityId}-${activity.date}`}>
                             {isAdmin && <TableCell className="font-medium">{activity.userName || '-'}</TableCell>}
-                            <TableCell className="font-medium">{activity.date}</TableCell>
+                            <TableCell className="font-medium">{formatDateMonthDay(activity.date)}</TableCell>
                             <TableCell className={activity.isTimeError ? "text-red-500 font-medium" : ""}>{activity.signInTime || '-'}</TableCell>
                             <TableCell className={activity.isTimeError ? "text-red-500 font-medium" : ""}>{activity.signOutTime || '-'}</TableCell>
                             <TableCell className="text-right">{activity.duration} 小時</TableCell>
@@ -290,7 +303,7 @@ export default function StatsPage() {
                             >
                               <div>
                                 {isAdmin && <div className="font-bold text-primary-600">{rescue.userName}</div>}
-                                <div className="font-medium">{rescue.date} {rescue.time}</div>
+                                <div className="font-medium">{formatDateMonthDay(rescue.date)} {rescue.time}</div>
                                 <div className="text-sm text-neutral-600">{rescue.caseType}</div>
                               </div>
                               {expandedRescues.includes(rescue.id) ? 
@@ -337,7 +350,7 @@ export default function StatsPage() {
                                   className="cursor-pointer hover:bg-neutral-50"
                                 >
                                   {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
-                                  <TableCell className="font-medium">{rescue.date}</TableCell>
+                                  <TableCell className="font-medium">{formatDateMonthDay(rescue.date)}</TableCell>
                                   <TableCell>{rescue.time}</TableCell>
                                   <TableCell>{"-"}</TableCell>
                                   <TableCell>{rescue.caseType}</TableCell>
