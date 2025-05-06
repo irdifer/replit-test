@@ -315,34 +315,26 @@ export default function StatsPage() {
 
         {/* 匯出功能區 */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={exportActivitiesToExcel}
-                className="flex items-center gap-1 mx-auto"
-                disabled={!monthlyActivities || monthlyActivities.length === 0}
-              >
-                <Download className="h-4 w-4" />
-                匯出協勤紀錄
-              </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={exportRescuesToExcel}
-                className="flex items-center gap-1 mx-auto"
-                disabled={!rescueList || rescueList.length === 0}
-              >
-                <Download className="h-4 w-4" />
-                匯出救護紀錄
-              </Button>
-            </CardContent>
-          </Card>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportActivitiesToExcel}
+            className="flex items-center gap-1 justify-center"
+            disabled={!monthlyActivities || monthlyActivities.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            匯出協勤紀錄
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportRescuesToExcel}
+            className="flex items-center gap-1 justify-center"
+            disabled={!rescueList || rescueList.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            匯出救護紀錄
+          </Button>
         </div>
 
         {isAdmin && (
