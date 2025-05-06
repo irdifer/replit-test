@@ -467,7 +467,9 @@ export class DatabaseStorage implements IStorage {
       // 測試帳號則回傳固定的預設統計數據
       return {
         workHours: 0,
-        rescueCount: 0
+        rescueCount: 0,
+        trainingCount: 0,
+        dutyCount: 0
       };
     }
     
@@ -559,9 +561,17 @@ export class DatabaseStorage implements IStorage {
       )
       .then(result => Number(result[0]?.count || 0));
     
+    // 計算常訓記錄數量
+    const trainingCount = userActivities.filter(activity => activity.type === "training").length;
+    
+    // 計算公差記錄數量
+    const dutyCount = userActivities.filter(activity => activity.type === "duty").length;
+    
     return {
       workHours,
       rescueCount,
+      trainingCount,
+      dutyCount
     };
   }
 }
