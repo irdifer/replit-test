@@ -26,6 +26,7 @@ type RescueListItem = {
   date: string;
   caseType: string;
   caseSubtype: string | null;
+  treatment: string | null;
   id: number;
 };
 
@@ -164,6 +165,7 @@ export default function StatsPage() {
                         <TableHead className="w-[120px]">日期</TableHead>
                         <TableHead>案件類型</TableHead>
                         <TableHead>案件子類型</TableHead>
+                        <TableHead>基本處置</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -172,6 +174,7 @@ export default function StatsPage() {
                           <TableCell className="font-medium">{rescue.date}</TableCell>
                           <TableCell>{rescue.caseType}</TableCell>
                           <TableCell>{rescue.caseSubtype || '-'}</TableCell>
+                          <TableCell>{rescue.treatment || '-'}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

@@ -30,6 +30,7 @@ export type RescueListItem = {
   date: string;
   caseType: string;
   caseSubtype: string | null;
+  treatment: string | null;
   id: number;
 };
 
@@ -324,6 +325,7 @@ export class DatabaseStorage implements IStorage {
       date: formatInTimeZone(new Date(rescue.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd"),
       caseType: rescue.caseType,
       caseSubtype: rescue.caseSubtype,
+      treatment: rescue.treatment,
       id: rescue.id
     }));
     
