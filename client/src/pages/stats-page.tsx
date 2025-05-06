@@ -24,6 +24,8 @@ type MonthlyActivity = {
   signInTime: string | null;
   signOutTime: string | null;
   duration: number;
+  userId?: number; // 僅管理員視圖中存在
+  userName?: string; // 僅管理員視圖中存在
 };
 
 // 定義救護案件列表項目類型
@@ -35,6 +37,8 @@ type RescueListItem = {
   treatment: string | null;
   hospital: string | null; // 新增送達醫院欄位
   id: number;
+  userId?: number; // 僅管理員視圖中存在
+  userName?: string; // 僅管理員視圖中存在
 };
 
 export default function StatsPage() {
@@ -58,12 +62,12 @@ export default function StatsPage() {
   
   // 獲取月度活動記錄
   const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
-    queryKey: ["/api/activities/monthly"],
+    queryKey: ["/api/activities/monthly", isAdmin ? "all=true" : ""],
   });
   
   // 獲取救護案件列表
   const { data: rescueList, isLoading: rescueLoading } = useQuery<RescueListItem[]>({
-    queryKey: ["/api/rescues/list"],
+    queryKey: ["/api/rescues/list", isAdmin ? "all=true" : ""],
   });
   
   // 匯出月度協勤記錄到Excel
@@ -73,7 +77,7 @@ export default function StatsPage() {
     // 準備Excel工作表數據
     const worksheet = XLSX.utils.json_to_sheet(
       monthlyActivities.map(activity => ({
-        '姓名': user?.name || '-',
+        '姓名': isAdmin ? (activity.userName || '-') : (user?.name || '-'),
         '協勤日期': activity.date,
         '協勤': activity.signInTime || '-',
         '退勤': activity.signOutTime || '-',
@@ -96,7 +100,9 @@ export default function StatsPage() {
     XLSX.utils.book_append_sheet(workbook, worksheet, '協勤統計');
     
     // 生成Excel檔案並下載
-    const fileName = `協勤統計_${user?.name}_${currentMonthFile}.xlsx`;
+    const fileName = isAdmin 
+      ? `協勤統計_所有隊員_${currentMonthFile}.xlsx`
+      : `協勤統計_${user?.name}_${currentMonthFile}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
   
@@ -201,6 +207,7 @@ export default function StatsPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          {isAdmin && <TableHead className="w-[100px]">隊員姓名</TableHead>}
                           <TableHead className="w-[100px]">日期</TableHead>
                           <TableHead className="w-[100px]">簽到時間</TableHead>
                           <TableHead className="w-[100px]">簽退時間</TableHead>
@@ -209,7 +216,8 @@ export default function StatsPage() {
                       </TableHeader>
                       <TableBody>
                         {monthlyActivities.map((activity) => (
-                          <TableRow key={activity.date}>
+                          <TableRow key={isAdmin ? `${activity.userId}-${activity.date}` : activity.date}>
+                            {isAdmin && <TableCell className="font-medium">{activity.userName || '-'}</TableCell>}
                             <TableCell className="font-medium">{activity.date}</TableCell>
                             <TableCell>{activity.signInTime || '-'}</TableCell>
                             <TableCell>{activity.signOutTime || '-'}</TableCell>
@@ -262,6 +270,7 @@ export default function StatsPage() {
                               onClick={() => toggleRescueDetails(rescue.id)}
                             >
                               <div>
+                                {isAdmin && <div className="font-bold text-primary-600">{rescue.userName}</div>}
                                 <div className="font-medium">{rescue.date} {rescue.time}</div>
                                 <div className="text-sm text-neutral-600">{rescue.caseType}</div>
                               </div>
@@ -292,6 +301,7 @@ export default function StatsPage() {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            {isAdmin && <TableHead className="w-[100px]">隊員姓名</TableHead>}
                             <TableHead className="w-[100px]">日期</TableHead>
                             <TableHead className="w-[80px]">時間</TableHead>
                             <TableHead className="w-[120px]">案件類型</TableHead>
@@ -303,6 +313,7 @@ export default function StatsPage() {
                         <TableBody>
                           {rescueList.map((rescue) => (
                             <TableRow key={rescue.id}>
+                              {isAdmin && <TableCell className="font-medium">{rescue.userName || '-'}</TableCell>}
                               <TableCell className="font-medium">{rescue.date}</TableCell>
                               <TableCell>{rescue.time}</TableCell>
                               <TableCell>{rescue.caseType}</TableCell>
