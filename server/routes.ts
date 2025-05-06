@@ -79,8 +79,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     const userId = req.user!.id;
-    const monthlyActivities = await storage.getUserMonthlyActivities(userId);
-    return res.json(monthlyActivities);
+    const isAdmin = req.user!.role === "admin";
+    const showAll = req.query.all === "true" && isAdmin;
+    
+    if (showAll) {
+      // Admin query with all=true parameter - return all users' data
+      const allUsersMonthlyActivities = await storage.getAllUsersMonthlyActivities();
+      return res.json(allUsersMonthlyActivities);
+    } else {
+      // Return current user's data only
+      const monthlyActivities = await storage.getUserMonthlyActivities(userId);
+      return res.json(monthlyActivities);
+    }
   });
 
   // Get rescue list for current user
@@ -88,8 +98,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     const userId = req.user!.id;
-    const rescueList = await storage.getUserRescuesList(userId);
-    return res.json(rescueList);
+    const isAdmin = req.user!.role === "admin";
+    const showAll = req.query.all === "true" && isAdmin;
+    
+    if (showAll) {
+      // Admin query with all=true parameter - return all users' data
+      const allUsersRescuesList = await storage.getAllUsersRescuesList();
+      return res.json(allUsersRescuesList);
+    } else {
+      // Return current user's data only
+      const rescueList = await storage.getUserRescuesList(userId);
+      return res.json(rescueList);
+    }
   });
 
   // Get stats for current user
@@ -97,8 +117,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     const userId = req.user!.id;
-    const stats = await storage.getUserStats(userId);
-    return res.json(stats);
+    const isAdmin = req.user!.role === "admin";
+    const showAll = req.query.all === "true" && isAdmin;
+    
+    if (showAll) {
+      // Admin query with all=true parameter - return all users' data
+      const allUsersStats = await storage.getAllUsersStats();
+      return res.json(allUsersStats);
+    } else {
+      // Return current user's data only
+      const stats = await storage.getUserStats(userId);
+      return res.json(stats);
+    }
   });
 
   // Create a new rescue record
