@@ -291,7 +291,7 @@ export default function AdminPage() {
                         <SelectItem value="隊員">隊員</SelectItem>
                         <SelectItem value="副分隊長">副分隊長</SelectItem>
                         <SelectItem value="分隊長">分隊長</SelectItem>
-                        <SelectItem value="志工承辦人">志工承辦人</SelectItem>
+                        <SelectItem value="隊員承辦人">隊員承辦人</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -487,7 +487,7 @@ export default function AdminPage() {
                     <SelectItem value="隊員">隊員</SelectItem>
                     <SelectItem value="副分隊長">副分隊長</SelectItem>
                     <SelectItem value="分隊長">分隊長</SelectItem>
-                    <SelectItem value="志工承辦人">志工承辦人</SelectItem>
+                    <SelectItem value="隊員承辦人">隊員承辦人</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
