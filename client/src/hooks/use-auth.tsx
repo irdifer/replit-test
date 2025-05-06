@@ -43,11 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries({ queryKey: ["/api/activities/monthly"] });
       queryClient.invalidateQueries({ queryKey: ["/api/rescues/list"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      toast({
-        title: "登入成功",
-        description: `歡迎回來，${user.name}！`,
-        duration: 3000, // 3秒後自動關閉
-      });
+      // 不顯示登入成功提示，直接進入首頁
+      // toast({
+      //   title: "登入成功",
+      //   description: `歡迎回來，${user.name}！`,
+      //   duration: 1500,
+      // });
     },
     onError: (error: Error) => {
       toast({
