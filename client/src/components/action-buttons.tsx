@@ -48,6 +48,14 @@ export default function ActionButtons({ onAction, isPending, dailyActivity }: Ac
     // 已簽到但未簽退的狀態
     const isOnDuty = dailyActivity?.signInTime && !dailyActivity?.signOutTime;
     
+    // 輸出日誌以便檢查狀態
+    console.log("按鈕狀態檢查:", { 
+      actionType, 
+      isOnDuty, 
+      dailyActivity, 
+      shouldDisable: (actionType === "training" || actionType === "duty") && isOnDuty 
+    });
+    
     // 簽到禁用條件：已經簽到
     if (actionType === "signin" && isOnDuty) {
       return true;
