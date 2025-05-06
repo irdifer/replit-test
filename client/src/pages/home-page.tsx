@@ -153,8 +153,8 @@ export default function HomePage() {
       <main className="max-w-5xl mx-auto p-4 md:p-6 pb-20">
         <StatsSummary stats={stats} />
         <ActivityStatus dailyActivity={dailyActivity} />
-        <ActionButtons onAction={handleAction} isPending={activityMutation.isPending} />
-        <RescueRecord onSubmit={handleRescueSubmit} isPending={rescueMutation.isPending} />
+        <ActionButtons onAction={handleAction} isPending={activityMutation.isPending} dailyActivity={dailyActivity} />
+        <RescueRecord onSubmit={handleRescueSubmit} isPending={rescueMutation.isPending} dailyActivity={dailyActivity} />
         <RecentActivity activities={recentActivities || []} />
       </main>
       

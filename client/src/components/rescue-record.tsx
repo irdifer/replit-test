@@ -21,9 +21,14 @@ import { FileDown } from "lucide-react";
 interface RescueRecordProps {
   onSubmit: (data: Partial<Rescue>) => void;
   isPending: boolean;
+  dailyActivity?: {
+    signInTime: string | null;
+    signOutTime: string | null;
+    signOutIP: string | null;
+  };
 }
 
-export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps) {
+export default function RescueRecord({ onSubmit, isPending, dailyActivity }: RescueRecordProps) {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [caseType, setCaseType] = useState<string | undefined>();
@@ -72,8 +77,55 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
     setShowWoundDimensions(shouldShow);
   }, [caseSubtype]);
 
+  // 用於檢查時間是否在簽到和簽退範圍內的函數
+  const validateTimeInRange = (time: string): { isValid: boolean, message?: string } => {
+    // 如果沒有簽到或簽退，則無法驗證
+    if (!dailyActivity?.signInTime || !dailyActivity?.signOutTime) {
+      return { isValid: false, message: "你需要先完成簽到並簽退才能記錄救護案件時間" };
+    }
+
+    // 轉換為 24 小時格式的時間來比較
+    const timeToMinutes = (timeStr: string): number => {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const signInMinutes = timeToMinutes(dailyActivity.signInTime);
+    const signOutMinutes = timeToMinutes(dailyActivity.signOutTime);
+    const checkTimeMinutes = timeToMinutes(time);
+
+    // 檢查新時間是否在簽到和簽退範圍內
+    if (checkTimeMinutes < signInMinutes) {
+      return { isValid: false, message: `救護時間不能早於今日簽到時間 (${dailyActivity.signInTime})` };
+    }
+
+    if (checkTimeMinutes > signOutMinutes) {
+      return { isValid: false, message: `救護時間不能晚於今日簽退時間 (${dailyActivity.signOutTime})` };
+    }
+
+    return { isValid: true };
+  };
+
   const handleSubmit = () => {
     if (!caseType) return;
+
+    // 驗證出動時間是否在簽到簽退範圍內
+    if (startTime) {
+      const startValidation = validateTimeInRange(startTime);
+      if (!startValidation.isValid) {
+        alert(startValidation.message);
+        return;
+      }
+    }
+
+    // 驗證返際時間是否在簽到簽退範圍內
+    if (endTime) {
+      const endValidation = validateTimeInRange(endTime);
+      if (!endValidation.isValid) {
+        alert(endValidation.message);
+        return;
+      }
+    }
 
     const rescueData: Partial<Rescue> = {
       caseType,

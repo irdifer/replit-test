@@ -41,6 +41,24 @@ export default function ActionButtons({ onAction, isPending, dailyActivity }: Ac
     },
   ];
 
+  // 判斷按鈕是否應被禁用的函數
+  const isButtonDisabled = (actionType: string) => {
+    if (isPending) return true;
+    
+    // 簽到禁用條件：已經簽到
+    if (actionType === "signin" && dailyActivity?.signInTime && !dailyActivity?.signOutTime) {
+      return true;
+    }
+    
+    // 簽退禁用條件：尚未簽到或已簽退
+    if (actionType === "signout" && (!dailyActivity?.signInTime || dailyActivity?.signOutTime)) {
+      return true;
+    }
+    
+    // 注意：常訓和公差作業即使已簽到但未簽退也不禁用
+    return false;
+  };
+
   return (
     <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
       {actions.map((action) => (
@@ -49,7 +67,7 @@ export default function ActionButtons({ onAction, isPending, dailyActivity }: Ac
           variant="outline"
           className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl transition-all duration-150"
           onClick={() => onAction(action.type)}
-          disabled={isPending}
+          disabled={isButtonDisabled(action.type)}
         >
           {isPending ? (
             <Loader2 className="h-6 w-6 animate-spin" />
