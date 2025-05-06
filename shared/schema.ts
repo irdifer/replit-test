@@ -11,6 +11,27 @@ export const users = pgTable("users", {
   role: text("role").default("volunteer"),
 });
 
+// 新增管理名單表格
+export const volunteers = pgTable("volunteers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  position: text("position").default("志工"), // 身分
+  isAdmin: boolean("is_admin").default(false), // 是否有管理權限
+  isRegistered: boolean("is_registered").default(false), // 是否已成功註冊
+  username: text("username").unique(), // 可能的用戶名
+  notes: text("notes"), // 備註
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertVolunteerSchema = createInsertSchema(volunteers).pick({
+  name: true,
+  position: true,
+  isAdmin: true,
+  isRegistered: true,
+  username: true,
+  notes: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -85,6 +106,9 @@ export const rescuesRelations = relations(rescues, ({ one }) => ({
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type Volunteer = typeof volunteers.$inferSelect;
+export type InsertVolunteer = z.infer<typeof insertVolunteerSchema>;
 
 export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;

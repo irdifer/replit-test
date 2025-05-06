@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, activities, type Activity, type InsertActivity, rescues, type Rescue, type InsertRescue, type DailyActivity, type Stats } from "@shared/schema";
+import { users, volunteers, type User, type InsertUser, type Volunteer, type InsertVolunteer, activities, type Activity, type InsertActivity, rescues, type Rescue, type InsertRescue, type DailyActivity, type Stats } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { format, startOfMonth, endOfMonth } from "date-fns";
@@ -41,6 +41,13 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Volunteer management methods
+  getVolunteers(): Promise<Volunteer[]>;
+  getVolunteer(id: number): Promise<Volunteer | undefined>;
+  createVolunteer(volunteer: InsertVolunteer): Promise<Volunteer>;
+  updateVolunteer(id: number, volunteer: Partial<InsertVolunteer>): Promise<Volunteer>;
+  deleteVolunteer(id: number): Promise<void>;
   
   // Activity methods
   createActivity(activity: InsertActivity): Promise<Activity>;
