@@ -235,12 +235,20 @@ export default function AdminPage() {
                   title: "更新中",
                   description: "正在更新全部隊員的註冊狀態",
                 });
-                // 將所有的隊員註冊狀態都設為已註冊
+                // 根據用戶名更新隊員註冊狀態
                 volunteers.forEach(volunteer => {
-                  if (!volunteer.isRegistered) {
+                  // 有用戶名但沒有註冊標記的隊員設為已註冊
+                  if (volunteer.username && !volunteer.isRegistered) {
                     updateVolunteerMutation.mutate({ 
                       id: volunteer.id, 
                       data: { isRegistered: true } 
+                    });
+                  }
+                  // 沒有用戶名但標記為已註冊的隊員重設為未註冊
+                  else if (!volunteer.username && volunteer.isRegistered) {
+                    updateVolunteerMutation.mutate({ 
+                      id: volunteer.id, 
+                      data: { isRegistered: false } 
                     });
                   }
                 });
@@ -411,8 +419,8 @@ export default function AdminPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isRegistered ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                            {volunteer.isRegistered ? "已註冊" : "未註冊"}
+                          <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isRegistered || volunteer.username ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                            {volunteer.isRegistered || volunteer.username ? "已註冊" : "未註冊"}
                           </span>
                         </TableCell>
                         <TableCell>{volunteer.username || "-"}</TableCell>
@@ -537,7 +545,7 @@ export default function AdminPage() {
                 <div className="col-span-3 flex items-center">
                   <Switch 
                     id="edit-isRegistered"
-                    checked={currentVolunteer?.isRegistered || false}
+                    checked={currentVolunteer?.isRegistered || (currentVolunteer?.username ? true : false)}
                     onCheckedChange={(checked) => {
                       if (currentVolunteer) {
                         setCurrentVolunteer({...currentVolunteer, isRegistered: checked});
@@ -545,7 +553,7 @@ export default function AdminPage() {
                     }}
                     disabled
                   />
-                  <span className="ml-2">{currentVolunteer?.isRegistered ? "已註冊" : "未註冊"}</span>
+                  <span className="ml-2">{currentVolunteer?.isRegistered || currentVolunteer?.username ? "已註冊" : "未註冊"}</span>
                   <span className="ml-2 text-neutral-500 text-xs">(自動更新)</span>
                 </div>
               </div>
