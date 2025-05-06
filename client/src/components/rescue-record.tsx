@@ -398,7 +398,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
           <div className="mb-4 p-3 border border-gray-200 bg-gray-50 rounded-md">
             <h4 className="flex items-center gap-1 font-medium mb-3 text-gray-700">
               <ClockIcon className="text-gray-600" />
-              出勤時間記錄
+              出勤時間記錄 {formErrors.time && <span className="text-red-600 ml-1">*必填</span>}
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -432,7 +432,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
           <div className="mb-4">
             <h4 className="flex items-center gap-1 font-medium mb-2">
               <MedicalIcon className="text-neutral-600" />
-              基本處置
+              基本處置 {formErrors.treatment && <span className="text-red-600 ml-1">*必填</span>}
             </h4>
             <Textarea
               id="treatmentNotes"
@@ -468,20 +468,6 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
           {/* Submit Button */}
           <div className="mt-6 pt-4 border-t border-gray-100">
             <div className="flex items-center justify-end gap-4">
-              {/* Export Button (Admin only) */}
-              {user?.role === "admin" && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleExport();
-                  }}
-                  className="px-4 py-2 rounded-md text-sm font-medium text-blue-600 border border-blue-300 hover:bg-blue-50"
-                >
-                  <FileDown className="mr-2 h-4 w-4 inline-block" />
-                  導出 Excel
-                </button>
-              )}
               
               <button
                 type="button"
