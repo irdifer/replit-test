@@ -113,21 +113,20 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
     return { isValid: true };
   };
 
-  // 驗證返隊時間（不能晚於簽退時間）
+  // 驗證返隊時間
   const validateEndTime = (time: string): { isValid: boolean, message?: string } => {
-    // 如果沒有簽退，則無法驗證
-    if (!dailyActivity?.signOutTime) {
-      return { isValid: false, message: "你需要先簽退才能記錄返隊時間" };
+    // 如果已簽退，檢查返隊時間不能晚於簽退時間
+    if (dailyActivity?.signOutTime) {
+      const signOutMinutes = timeToMinutes(dailyActivity.signOutTime);
+      const endTimeMinutes = timeToMinutes(time);
+      
+      // 檢查返隊時間是否不晚於簽退時間
+      if (endTimeMinutes > signOutMinutes) {
+        return { isValid: false, message: `返隊時間不能晚於協勤簽退時間 (${dailyActivity.signOutTime})` };
+      }
     }
-
-    const signOutMinutes = timeToMinutes(dailyActivity.signOutTime);
-    const endTimeMinutes = timeToMinutes(time);
-
-    // 檢查返隊時間是否不晚於簽退時間
-    if (endTimeMinutes > signOutMinutes) {
-      return { isValid: false, message: `返隊時間不能晚於協勤簽退時間 (${dailyActivity.signOutTime})` };
-    }
-
+    
+    // 如果未簽退，則允許記錄返隊時間（因為返隊表示還在分隊內）
     return { isValid: true };
   };
 
