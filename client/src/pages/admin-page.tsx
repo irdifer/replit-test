@@ -21,6 +21,7 @@ interface VolunteerFormData {
   name: string;
   position: string;
   isAdmin: boolean;
+  teamType: string;
   username?: string;
   notes?: string;
 }
@@ -36,8 +37,9 @@ export default function AdminPage() {
   const [currentVolunteer, setCurrentVolunteer] = useState<Volunteer | null>(null);
   const [formData, setFormData] = useState<VolunteerFormData>({
     name: "",
-    position: "志工",
+    position: "隊員",
     isAdmin: false,
+    teamType: "T1",
     username: "",
     notes: ""
   });
@@ -132,18 +134,20 @@ export default function AdminPage() {
       name: "",
       position: "隊員",
       isAdmin: false,
+      teamType: "T1",
       username: "",
       notes: ""
     });
   };
   
-  // 編輯志工
+  // 編輯隊員
   const handleEdit = (volunteer: Volunteer) => {
     setCurrentVolunteer(volunteer);
     setFormData({
       name: volunteer.name,
       position: volunteer.position || "隊員",
       isAdmin: volunteer.isAdmin || false,
+      teamType: volunteer.teamType || "T1",
       username: volunteer.username || "",
       notes: volunteer.notes || ""
     });
