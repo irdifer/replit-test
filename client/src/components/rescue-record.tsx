@@ -119,7 +119,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
         onClick={() => setIsOpen(!isOpen)}>
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <AmbulanceIcon className="text-red-500" />
+            <span className="text-xl">🏥</span>
             救護記錄
           </CardTitle>
           <ExpandIcon 
@@ -234,7 +234,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
           {/* Hospital Selection */}
           <div className="mb-4 p-3 border border-green-100 bg-green-50 rounded-md">
             <h4 className="flex items-center gap-1 font-medium mb-3 text-green-800">
-              <HospitalIcon className="text-green-600" />
+              <span className="text-xl">🚑</span>
               送達醫院
             </h4>
             <div>
