@@ -213,7 +213,7 @@ export default function StatsPage() {
             <CardContent 
               className={cn(
                 "transition-all duration-300 overflow-hidden", 
-                isActivitiesOpen ? "max-h-[1000px] p-5" : "max-h-0 p-0"
+                isActivitiesOpen ? "max-h-[600px] p-5 overflow-auto" : "max-h-0 p-0"
               )}
             >
               {activitiesLoading ? (
@@ -270,7 +270,7 @@ export default function StatsPage() {
             <CardContent 
               className={cn(
                 "transition-all duration-300 overflow-hidden", 
-                isRescueOpen ? "max-h-[1000px] p-5" : "max-h-0 p-0"
+                isRescueOpen ? "max-h-[600px] p-5 overflow-auto" : "max-h-0 p-0"
               )}
             >
               {rescueLoading ? (
