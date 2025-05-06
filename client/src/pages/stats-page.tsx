@@ -124,16 +124,16 @@ export default function StatsPage() {
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth() + 1;
         
+        // 只顯示5月及其之後的月份數據（依照需求）
         return [
-          { year: currentYear, months: [4, 5, currentMonth] }, // 假設當前年有資料的月份
-          { year: currentYear-1, months: [11, 12] } // 去年的月份
+          { year: currentYear, months: [5] } // 只顯示5月及之後的月份
         ];
       } catch(error) {
         console.error("Error fetching available months:", error);
-        // 發生錯誤時返回當前年月作為預設值
+        // 發生錯誤時返回從5月開始的月份
         const currentYear = new Date().getFullYear();
-        const currentMonth = new Date().getMonth() + 1;
-        return [{ year: currentYear, months: [currentMonth] }];
+        // 當前月份如果小於5月，只顯示5月，否則顯示當前月份
+        return [{ year: currentYear, months: [5] }];
       }
     }
   });
