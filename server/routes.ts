@@ -100,14 +100,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = req.user!.id;
     const isAdmin = req.user!.role === "admin";
     const showAll = req.query.all === "true" && isAdmin;
+    const year = req.query.year ? parseInt(req.query.year as string) : new Date().getFullYear();
+    const month = req.query.month ? parseInt(req.query.month as string) : new Date().getMonth() + 1;
+    
+    // 記錄查詢參數
+    console.log(`查詢救護案件列表: userId=${userId}, isAdmin=${isAdmin}, showAll=${showAll}, year=${year}, month=${month}`);
     
     if (showAll) {
       // Admin query with all=true parameter - return all users' data
       const allUsersRescuesList = await storage.getAllUsersRescuesList();
+      console.log(`管理員查詢: 取得 ${allUsersRescuesList.length} 筆救護案件記錄`);
       return res.json(allUsersRescuesList);
     } else {
       // Return current user's data only
       const rescueList = await storage.getUserRescuesList(userId);
+      console.log(`普通用戶查詢: 取得 ${rescueList.length} 筆救護案件記錄`);
+      
+      // 檢查救護類別資料
+      rescueList.forEach((rescue, index) => {
+        console.log(`救護記錄 #${index+1}:`, {
+          id: rescue.id,
+          caseType: rescue.caseType,
+          rescueType: rescue.rescueType
+        });
+      });
+      
       return res.json(rescueList);
     }
   });

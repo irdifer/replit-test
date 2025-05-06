@@ -188,7 +188,19 @@ export default function StatsPage() {
         : `/api/rescues/list?${yearMonthParam}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch data');
-      return res.json();
+      const data = await res.json();
+      
+      // 記錄接收到的救護案件數據，特別關注救護類別
+      console.log('救護案件列表:', data.length);
+      data.forEach((rescue: RescueListItem, index: number) => {
+        console.log(`救護案件 #${index+1}:`, {
+          caseType: rescue.caseType,
+          rescueType: rescue.rescueType,
+          rawData: rescue
+        });
+      });
+      
+      return data;
     },
   });
   
@@ -275,24 +287,28 @@ export default function StatsPage() {
     const worksheet = XLSX.utils.json_to_sheet(
       rescueList.map(rescue => ({
         '姓名': isAdmin ? (rescue.userName || '-') : (user?.name || '-'),
-        '出勤時間': `${rescue.date} ${rescue.startTime || rescue.time}`,
+        '日期': rescue.date,
+        '出勤時間': rescue.startTime || rescue.time,
         '返隊時間': rescue.endTime || '-',
-        '項目': rescue.caseType,
-        '子項目': rescue.caseSubtype || '-',
+        '救護類別': rescue.rescueType || '-',
+        '案件類型': rescue.caseType,
+        '子類別': rescue.caseSubtype || '-',
         '送達醫院': rescue.hospital || '-',
-        '敘述': rescue.treatment || '-'
+        '基本處置': rescue.treatment || '-'
       }))
     );
     
     // 設置工作表寬度
     const wscols = [
       { wch: 10 }, // 姓名
-      { wch: 20 }, // 出勤時間
-      { wch: 20 }, // 返隊時間
-      { wch: 15 }, // 項目
-      { wch: 15 }, // 子項目
+      { wch: 10 }, // 日期
+      { wch: 10 }, // 出勤時間
+      { wch: 10 }, // 返隊時間
+      { wch: 15 }, // 救護類別
+      { wch: 15 }, // 案件類型
+      { wch: 15 }, // 子類別
       { wch: 15 }, // 送達醫院
-      { wch: 40 }  // 敘述
+      { wch: 40 }  // 基本處置
     ];
     worksheet['!cols'] = wscols;
     
