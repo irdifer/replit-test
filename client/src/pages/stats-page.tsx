@@ -24,6 +24,7 @@ type MonthlyActivity = {
 // 定義救護案件列表項目類型
 type RescueListItem = {
   date: string;
+  time: string;
   caseType: string;
   caseSubtype: string | null;
   treatment: string | null;
@@ -162,7 +163,8 @@ export default function StatsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[120px]">日期</TableHead>
+                        <TableHead className="w-[100px]">日期</TableHead>
+                        <TableHead className="w-[80px]">時間</TableHead>
                         <TableHead>案件類型</TableHead>
                         <TableHead>案件子類型</TableHead>
                         <TableHead>基本處置</TableHead>
@@ -172,6 +174,7 @@ export default function StatsPage() {
                       {rescueList.map((rescue) => (
                         <TableRow key={rescue.id}>
                           <TableCell className="font-medium">{rescue.date}</TableCell>
+                          <TableCell>{rescue.time}</TableCell>
                           <TableCell>{rescue.caseType}</TableCell>
                           <TableCell>{rescue.caseSubtype || '-'}</TableCell>
                           <TableCell>{rescue.treatment || '-'}</TableCell>
