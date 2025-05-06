@@ -1,16 +1,46 @@
 import { useState } from "react";
 import { Activity } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HistoryIcon, ClockIcon, AmbulanceIcon, TrainingIcon, DutyIcon, ExpandIcon } from "./ui/icons";
+import { Button } from "@/components/ui/button";
+import { HistoryIcon, ClockIcon, AmbulanceIcon, TrainingIcon, DutyIcon, ExpandIcon, SaveIcon } from "./ui/icons";
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { cn } from "@/lib/utils";
+import { utils, writeFile } from "xlsx";
 
 interface RecentActivityProps {
   activities: Activity[];
 }
 
+// 定義台灣時區
+const TAIWAN_TIMEZONE = "Asia/Taipei";
+
 export default function RecentActivity({ activities }: RecentActivityProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  // 預設收合活動記錄
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // 處理匯出 Excel
+  const handleExportExcel = () => {
+    if (!activities || activities.length === 0) return;
+    
+    // 準備 Excel 資料
+    const excelData = activities.map(activity => ({
+      活動類型: getActivityTitle(activity),
+      時間: formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd HH:mm:ss"),
+      記錄ID: activity.id
+    }));
+    
+    // 創建工作表
+    const worksheet = utils.json_to_sheet(excelData);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, "活動記錄");
+    
+    // 產生現在時間作為檔名
+    const now = formatInTimeZone(new Date(), TAIWAN_TIMEZONE, "yyyyMMdd_HHmmss");
+    
+    // 下載檔案
+    writeFile(workbook, `活動記錄_${now}.xlsx`);
+  };
   
   // Helper function to get icon based on activity type
   const getActivityIcon = (type: string) => {
@@ -104,7 +134,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
                 <div className="flex-1">
                   <p className="font-medium">{getActivityTitle(activity)}</p>
                   <p className="text-sm text-neutral-500">
-                    {format(new Date(activity.timestamp), "yyyy-MM-dd HH:mm:ss")}
+                    {formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd HH:mm:ss")}
                   </p>
                 </div>
               </div>
