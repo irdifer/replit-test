@@ -203,10 +203,16 @@ async function fetchActivityRecordsForSync() {
   // 獲取所有使用者
   const users = await db.query.users.findMany();
   
+  // 過濾掉3Bug帳號
+  const filteredUsers = users.filter(user => 
+    !user.name.toLowerCase().includes('3bug') && 
+    !user.username.toLowerCase().includes('3bug')
+  );
+  
   // 收集所有使用者的協勤時數紀錄
   const results = [];
   
-  for (const user of users) {
+  for (const user of filteredUsers) {
     // 獲取該使用者的月度活動記錄
     const monthlyActivities = await fetchUserMonthlyActivities(user.id);
     
