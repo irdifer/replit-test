@@ -10,9 +10,14 @@ import { Loader2 } from "lucide-react";
 interface ActionButtonsProps {
   onAction: (type: string) => void;
   isPending: boolean;
+  dailyActivity?: {
+    signInTime: string | null;
+    signOutTime: string | null;
+    signOutIP: string | null;
+  };
 }
 
-export default function ActionButtons({ onAction, isPending }: ActionButtonsProps) {
+export default function ActionButtons({ onAction, isPending, dailyActivity }: ActionButtonsProps) {
   const actions = [
     { 
       type: "signin", 

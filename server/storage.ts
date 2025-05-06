@@ -7,7 +7,7 @@ import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 // 定義台灣時區
 const TAIWAN_TIMEZONE = "Asia/Taipei";
 import { db } from "./db";
-import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sql, or } from "drizzle-orm";
 import * as connectPgModule from "connect-pg-simple";
 import { pool } from "./db";
 
@@ -23,6 +23,9 @@ export type MonthlyActivity = {
   signInTime: string | null;
   signOutTime: string | null;
   duration: number; // 以小時為單位
+  isTimeError?: boolean; // 標記時間順序錯誤
+  activityId?: number; // 可用於識別特定記錄
+  activityType?: string; // 活動類型 (signin/signout/pair)
 };
 
 // 定義救護案件列表項目類型
@@ -294,10 +297,10 @@ export class DatabaseStorage implements IStorage {
     const monthlyActivities: MonthlyActivity[] = [];
     
     // 按日期處理所有簽到和簽退記錄
-    for (const [date, activitiesForDate] of dateToActivities.entries()) {
+    Array.from(dateToActivities.entries()).forEach(([date, activitiesForDate]) => {
       // 分離簽到和簽退記錄
-      const signIns = activitiesForDate.filter(a => a.type === "signin");
-      const signOuts = activitiesForDate.filter(a => a.type === "signout");
+      const signIns = activitiesForDate.filter((a: Activity) => a.type === "signin");
+      const signOuts = activitiesForDate.filter((a: Activity) => a.type === "signout");
       
       // 如果有簽到和簽退記錄，創建匯配對
       if (signIns.length > 0 && signOuts.length > 0) {
@@ -384,10 +387,10 @@ export class DatabaseStorage implements IStorage {
           });
         }
       }
-    }
+    });
     
     // 先按日期排序，然後按活動類型排序。這樣簽到簽退對就會在最上面。
-    monthlyActivities.sort((a, b) => {
+    monthlyActivities.sort((a: MonthlyActivity, b: MonthlyActivity) => {
       // 先按日期倖序排序，最新的在前
       const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
       if (dateComparison !== 0) {
