@@ -126,4 +126,6 @@ export type DailyActivity = {
 export type Stats = {
   workHours: number;
   rescueCount: number;
+  trainingCount: number; // 常訓記錄數量
+  dutyCount: number;    // 公差記錄數量
 };
