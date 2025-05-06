@@ -2,6 +2,10 @@ import { users, type User, type InsertUser, activities, type Activity, type Inse
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
+
+// 定義台灣時區
+const TAIWAN_TIMEZONE = "Asia/Taipei";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
 import * as connectPgModule from "connect-pg-simple";
@@ -111,10 +115,13 @@ export class DatabaseStorage implements IStorage {
       };
     }
     
-    const today = new Date();
-    const todayStr = format(today, "yyyy-MM-dd");
-    const todayStart = new Date(`${todayStr}T00:00:00`);
-    const todayEnd = new Date(`${todayStr}T23:59:59`);
+    // 使用台灣時區取得今天的日期
+    const today = toZonedTime(new Date(), TAIWAN_TIMEZONE);
+    const todayStr = formatInTimeZone(today, TAIWAN_TIMEZONE, "yyyy-MM-dd");
+    
+    // 台灣時區的今天開始和結束時間
+    const todayStart = new Date(`${todayStr}T00:00:00+08:00`);
+    const todayEnd = new Date(`${todayStr}T23:59:59+08:00`);
     
     // Get today's activities for this user
     const userTodayActivities = await db.select()
@@ -132,8 +139,8 @@ export class DatabaseStorage implements IStorage {
     const signOutActivity = userTodayActivities.find(a => a.type === "signout");
     
     return {
-      signInTime: signInActivity ? format(new Date(signInActivity.timestamp), "HH:mm") : null,
-      signOutTime: signOutActivity ? format(new Date(signOutActivity.timestamp), "HH:mm") : null,
+      signInTime: signInActivity ? formatInTimeZone(new Date(signInActivity.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
+      signOutTime: signOutActivity ? formatInTimeZone(new Date(signOutActivity.timestamp), TAIWAN_TIMEZONE, "HH:mm") : null,
       signOutIP: signOutActivity ? signOutActivity.ip : null,
     };
   }
@@ -233,9 +240,16 @@ export class DatabaseStorage implements IStorage {
       };
     }
     
-    const now = new Date();
-    const firstDayOfMonth = startOfMonth(now);
-    const lastDayOfMonth = endOfMonth(now);
+    // 使用台灣時區取得本月的開始和結束日期
+    const now = toZonedTime(new Date(), TAIWAN_TIMEZONE);
+    const firstDayOfMonthZoned = startOfMonth(now);
+    const lastDayOfMonthZoned = endOfMonth(now);
+    
+    // 需要將台灣時區的日期轉換為 UTC 以連結數據庫
+    const firstDayStr = formatInTimeZone(firstDayOfMonthZoned, TAIWAN_TIMEZONE, "yyyy-MM-dd");
+    const lastDayStr = formatInTimeZone(lastDayOfMonthZoned, TAIWAN_TIMEZONE, "yyyy-MM-dd");
+    const firstDayOfMonth = new Date(`${firstDayStr}T00:00:00+08:00`);
+    const lastDayOfMonth = new Date(`${lastDayStr}T23:59:59+08:00`);
     
     // Get user activities for this month
     const userActivities = await db.select()
@@ -255,7 +269,8 @@ export class DatabaseStorage implements IStorage {
     const activitiesByDay = new Map<string, { signIn?: Date, signOut?: Date }>();
     
     userActivities.forEach(activity => {
-      const day = format(new Date(activity.timestamp), "yyyy-MM-dd");
+      // 使用台灣時區格式化日期
+      const day = formatInTimeZone(new Date(activity.timestamp), TAIWAN_TIMEZONE, "yyyy-MM-dd");
       const entry = activitiesByDay.get(day) || {};
       
       if (activity.type === "signin") {
