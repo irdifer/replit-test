@@ -325,7 +325,7 @@ export default function StatsPage() {
                 disabled={!monthlyActivities || monthlyActivities.length === 0}
               >
                 <Download className="h-4 w-4" />
-                匯出協勤記錄 Excel
+                匯出協勤紀錄
               </Button>
             </CardContent>
           </Card>
@@ -339,7 +339,7 @@ export default function StatsPage() {
                 disabled={!rescueList || rescueList.length === 0}
               >
                 <Download className="h-4 w-4" />
-                匯出救護案件 Excel
+                匯出救護紀錄
               </Button>
             </CardContent>
           </Card>
