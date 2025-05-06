@@ -79,6 +79,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
       caseType,
       caseSubtype,
       treatment,
+      hospital,  // 添加送達醫院欄位
       startTime,
       endTime,
     };
@@ -96,6 +97,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
     setCaseType(undefined);
     setCaseSubtype(undefined);
     setTreatment("");
+    setHospital(undefined); // 重置送達醫院
     setWoundLength("");
     setWoundHeight("");
     setWoundDepth("");
@@ -228,6 +230,32 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
               </div>
             </div>
           )}
+          
+          {/* Hospital Selection */}
+          <div className="mb-4 p-3 border border-green-100 bg-green-50 rounded-md">
+            <h4 className="flex items-center gap-1 font-medium mb-3 text-green-800">
+              <AmbulanceIcon className="text-green-600" />
+              送達醫院
+            </h4>
+            <div>
+              <Label htmlFor="hospital" className="block text-sm font-medium text-neutral-700 mb-1">
+                選擇送達醫院
+              </Label>
+              <Select
+                value={hospital}
+                onValueChange={setHospital}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="選擇送達醫院..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {hospitalOptions.map(option => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           
           {/* Mission Time Selection */}
           <div className="mb-4 p-3 border border-gray-200 bg-gray-50 rounded-md">
