@@ -3,12 +3,47 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HomeIcon, ChartIcon } from "@/components/ui/icons";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { HomeIcon, ChartIcon, ExpandIcon } from "@/components/ui/icons";
 import UserMenu from "@/components/user-menu";
+import { useQuery } from "@tanstack/react-query";
+import { formatInTimeZone } from "date-fns-tz";
+import { cn } from "@/lib/utils";
+
+// 定義台灣時區
+const TAIWAN_TIMEZONE = "Asia/Taipei";
+
+// 定義月度活動記錄類型
+type MonthlyActivity = {
+  date: string;
+  signInTime: string | null;
+  signOutTime: string | null;
+  duration: number;
+};
+
+// 定義救護案件列表項目類型
+type RescueListItem = {
+  date: string;
+  caseType: string;
+  caseSubtype: string | null;
+  id: number;
+};
 
 export default function StatsPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
+  const [isRescueOpen, setIsRescueOpen] = useState(true);
+  
+  // 獲取月度活動記錄
+  const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
+    queryKey: ["/api/activities/monthly"],
+  });
+  
+  // 獲取救護案件列表
+  const { data: rescueList, isLoading: rescueLoading } = useQuery<RescueListItem[]>({
+    queryKey: ["/api/rescues/list"],
+  });
 
   return (
     <div className="bg-neutral-50 text-neutral-800 min-h-screen pb-16 md:pb-0 overflow-auto">
@@ -43,26 +78,106 @@ export default function StatsPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 gap-6 mb-6">
+          {/* 月度協勤統計卡片 */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">月度協勤統計</CardTitle>
+            <CardHeader 
+              className="px-5 py-4 border-b border-neutral-200 cursor-pointer"
+              onClick={() => setIsActivitiesOpen(!isActivitiesOpen)}
+            >
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">月度協勤統計</CardTitle>
+                <ExpandIcon 
+                  className={cn("text-neutral-500 transition-transform", 
+                    isActivitiesOpen ? "rotate-180" : "")} 
+                />
+              </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-neutral-600">
-                此功能正在開發中，敬請期待。
-              </p>
+            
+            <CardContent 
+              className={cn(
+                "transition-all duration-300 overflow-hidden", 
+                isActivitiesOpen ? "max-h-[1000px] p-5" : "max-h-0 p-0"
+              )}
+            >
+              {activitiesLoading ? (
+                <div className="py-4 text-center text-neutral-500">正在加載活動記錄...</div>
+              ) : !monthlyActivities || monthlyActivities.length === 0 ? (
+                <div className="py-4 text-center text-neutral-500">本月尚無協勤記錄</div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[120px]">日期</TableHead>
+                        <TableHead>簽到時間</TableHead>
+                        <TableHead>簽退時間</TableHead>
+                        <TableHead className="text-right">協勤時數</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {monthlyActivities.map((activity) => (
+                        <TableRow key={activity.date}>
+                          <TableCell className="font-medium">{activity.date}</TableCell>
+                          <TableCell>{activity.signInTime || '-'}</TableCell>
+                          <TableCell>{activity.signOutTime || '-'}</TableCell>
+                          <TableCell className="text-right">{activity.duration} 小時</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
 
+          {/* 救護案件統計卡片 */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">救護案件統計</CardTitle>
+            <CardHeader 
+              className="px-5 py-4 border-b border-neutral-200 cursor-pointer"
+              onClick={() => setIsRescueOpen(!isRescueOpen)}
+            >
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">救護案件統計</CardTitle>
+                <ExpandIcon 
+                  className={cn("text-neutral-500 transition-transform", 
+                    isRescueOpen ? "rotate-180" : "")} 
+                />
+              </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-neutral-600">
-                此功能正在開發中，敬請期待。
-              </p>
+            
+            <CardContent 
+              className={cn(
+                "transition-all duration-300 overflow-hidden", 
+                isRescueOpen ? "max-h-[1000px] p-5" : "max-h-0 p-0"
+              )}
+            >
+              {rescueLoading ? (
+                <div className="py-4 text-center text-neutral-500">正在加載救護案件...</div>
+              ) : !rescueList || rescueList.length === 0 ? (
+                <div className="py-4 text-center text-neutral-500">本月尚無救護案件記錄</div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[120px]">日期</TableHead>
+                        <TableHead>案件類型</TableHead>
+                        <TableHead>案件子類型</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {rescueList.map((rescue) => (
+                        <TableRow key={rescue.id}>
+                          <TableCell className="font-medium">{rescue.date}</TableCell>
+                          <TableCell>{rescue.caseType}</TableCell>
+                          <TableCell>{rescue.caseSubtype || '-'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

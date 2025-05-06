@@ -42,6 +42,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(201).json(activity);
   });
 
+  // Get monthly activities for current user
+  app.get("/api/activities/monthly", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const userId = req.user!.id;
+    const monthlyActivities = await storage.getUserMonthlyActivities(userId);
+    return res.json(monthlyActivities);
+  });
+
+  // Get rescue list for current user
+  app.get("/api/rescues/list", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const userId = req.user!.id;
+    const rescueList = await storage.getUserRescuesList(userId);
+    return res.json(rescueList);
+  });
+
   // Get stats for current user
   app.get("/api/stats", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
