@@ -28,10 +28,11 @@ export type MonthlyActivity = {
 // 定義救護案件列表項目類型
 export type RescueListItem = {
   date: string;
-  time: string; // 新增時間欄位
+  time: string; // 時間欄位
   caseType: string;
   caseSubtype: string | null;
   treatment: string | null;
+  hospital: string | null; // 新增送達醫院欄位
   id: number;
 };
 
@@ -359,6 +360,7 @@ export class DatabaseStorage implements IStorage {
       caseType: rescue.caseType,
       caseSubtype: rescue.caseSubtype,
       treatment: rescue.treatment,
+      hospital: rescue.hospital,
       id: rescue.id
     }));
     
@@ -378,6 +380,7 @@ export class DatabaseStorage implements IStorage {
           caseType: insertRescue.caseType,
           caseSubtype: insertRescue.caseSubtype || null,
           treatment: insertRescue.treatment || null,
+          hospital: insertRescue.hospital || null,
           startTime: insertRescue.startTime || null,
           endTime: insertRescue.endTime || null,
           woundLength: insertRescue.woundLength || null,
@@ -393,6 +396,7 @@ export class DatabaseStorage implements IStorage {
       ...insertRescue,
       caseSubtype: insertRescue.caseSubtype || null,
       treatment: insertRescue.treatment || null,
+      hospital: insertRescue.hospital || null,
       startTime: insertRescue.startTime || null,
       endTime: insertRescue.endTime || null,
       woundLength: insertRescue.woundLength || null,
