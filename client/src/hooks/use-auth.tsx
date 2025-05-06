@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<SelectUser | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    refetchInterval: 30000, // 每30秒自動刷新一次用戶資料，以確保權限變更能夠及時反映
   });
 
   const loginMutation = useMutation({
