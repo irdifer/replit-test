@@ -254,6 +254,24 @@ export default function StatsPage() {
           </Link>
         </div>
 
+        {/* 月度統計摘要 */}
+        <div className="mb-6 p-4 bg-white rounded-lg border border-neutral-200 shadow-sm">
+          <div className="grid grid-cols-1 gap-4">
+            {/* 救護案件總數 */}
+            <div className="flex items-center justify-between p-3 rounded-md bg-blue-50 border border-blue-100">
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-blue-500 text-white mr-3">
+                  <ChevronRight className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-neutral-500">當月救護案件總數</h3>
+                  <p className="text-2xl font-bold text-blue-600">{rescueList?.length || 0} 件</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-6 mb-6">
           {/* 月度協勤統計卡片 */}
           <Card>
