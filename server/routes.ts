@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     const userId = req.user!.id;
-    const { caseType, caseSubtype, treatment } = req.body;
+    const { caseType, caseSubtype, treatment, hospital, startTime, endTime, woundLength, woundHeight, woundDepth } = req.body;
 
     if (!caseType) {
       return res.status(400).json({ message: "Case type is required" });
@@ -85,9 +85,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
       caseType,
       caseSubtype,
       treatment,
+      hospital,
+      startTime,
+      endTime,
+      woundLength,
+      woundHeight,
+      woundDepth,
     });
 
     return res.status(201).json(rescue);
+  });
+  
+  // Volunteer management routes (admin only)
+  // Get all volunteers
+  app.get("/api/volunteers", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (req.user!.role !== "admin") return res.sendStatus(403);
+    
+    const volunteers = await storage.getVolunteers();
+    return res.json(volunteers);
+  });
+  
+  // Get a specific volunteer
+  app.get("/api/volunteers/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (req.user!.role !== "admin") return res.sendStatus(403);
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid volunteer ID" });
+    }
+    
+    const volunteer = await storage.getVolunteer(id);
+    if (!volunteer) {
+      return res.status(404).json({ message: "Volunteer not found" });
+    }
+    
+    return res.json(volunteer);
+  });
+  
+  // Create a new volunteer
+  app.post("/api/volunteers", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (req.user!.role !== "admin") return res.sendStatus(403);
+    
+    const { name, position, isAdmin, username, notes } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+    
+    try {
+      const volunteer = await storage.createVolunteer({
+        name,
+        position: position || "志工",
+        isAdmin: isAdmin || false,
+        isRegistered: false, // 新建的志工預設尚未註冊
+        username,
+        notes
+      });
+      
+      return res.status(201).json(volunteer);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("duplicate key")) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Update a volunteer
+  app.patch("/api/volunteers/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (req.user!.role !== "admin") return res.sendStatus(403);
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid volunteer ID" });
+    }
+    
+    const { name, position, isAdmin, isRegistered, username, notes } = req.body;
+    
+    try {
+      const volunteer = await storage.updateVolunteer(id, {
+        ...(name && { name }),
+        ...(position && { position }),
+        ...(isAdmin !== undefined && { isAdmin }),
+        ...(isRegistered !== undefined && { isRegistered }),
+        ...(username && { username }),
+        ...(notes !== undefined && { notes })
+      });
+      
+      return res.json(volunteer);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("duplicate key")) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Delete a volunteer
+  app.delete("/api/volunteers/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (req.user!.role !== "admin") return res.sendStatus(403);
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid volunteer ID" });
+    }
+    
+    await storage.deleteVolunteer(id);
+    return res.sendStatus(204);
   });
 
   const httpServer = createServer(app);
