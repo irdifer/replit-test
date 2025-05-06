@@ -270,13 +270,19 @@ export class DatabaseStorage implements IStorage {
     // Calculate hours for each day
     activitiesByDay.forEach(({ signIn, signOut }) => {
       if (signIn && signOut) {
-        const hours = (signOut.getTime() - signIn.getTime()) / (1000 * 60 * 60);
-        workHours += hours;
+        // 確保時間差為正數，使用 Math.abs 取絕對值
+        const timeDiff = Math.abs(signOut.getTime() - signIn.getTime());
+        const hours = timeDiff / (1000 * 60 * 60);
+        
+        // 排除異常的時間差 (大於24小時或小於0的情況)
+        if (hours > 0 && hours <= 24) {
+          workHours += hours;
+        }
       }
     });
     
-    // Round to 1 decimal place
-    workHours = Math.round(workHours * 10) / 10;
+    // Round to 1 decimal place and ensure it's not negative
+    workHours = Math.max(0, Math.round(workHours * 10) / 10);
     
     // Count rescue cases
     const rescueCount = await db.select({ count: sql`count(*)` })
