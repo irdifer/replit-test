@@ -70,7 +70,7 @@ const TEST_ACCOUNTS = [
   {
     username: "emt_3bug",
     password: "123456",
-    name: "EMT 3bug帳號",
+    name: "許毓庭",
     role: "volunteer"
   },
   {
