@@ -62,12 +62,26 @@ export default function StatsPage() {
   
   // 獲取月度活動記錄
   const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
-    queryKey: ["/api/activities/monthly", isAdmin ? "all=true" : ""],
+    queryKey: ["/api/activities/monthly", isAdmin],
+    queryFn: async ({ queryKey }) => {
+      const isAdmin = queryKey[1] as boolean;
+      const url = isAdmin ? `/api/activities/monthly?all=true` : '/api/activities/monthly';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch data');
+      return res.json();
+    },
   });
   
   // 獲取救護案件列表
   const { data: rescueList, isLoading: rescueLoading } = useQuery<RescueListItem[]>({
-    queryKey: ["/api/rescues/list", isAdmin ? "all=true" : ""],
+    queryKey: ["/api/rescues/list", isAdmin],
+    queryFn: async ({ queryKey }) => {
+      const isAdmin = queryKey[1] as boolean;
+      const url = isAdmin ? `/api/rescues/list?all=true` : '/api/rescues/list';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch data');
+      return res.json();
+    },
   });
   
   // 匯出月度協勤記錄到Excel
