@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AmbulanceIcon, ClockIcon, ExpandIcon, MedicalIcon, SaveIcon } from "./ui/icons";
+import { AmbulanceIcon, ClockIcon, ExpandIcon, MedicalIcon, SaveIcon, HospitalIcon } from "./ui/icons";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { FileDown } from "lucide-react";
@@ -234,7 +234,7 @@ export default function RescueRecord({ onSubmit, isPending }: RescueRecordProps)
           {/* Hospital Selection */}
           <div className="mb-4 p-3 border border-green-100 bg-green-50 rounded-md">
             <h4 className="flex items-center gap-1 font-medium mb-3 text-green-800">
-              <AmbulanceIcon className="text-green-600" />
+              <HospitalIcon className="text-green-600" />
               送達醫院
             </h4>
             <div>
