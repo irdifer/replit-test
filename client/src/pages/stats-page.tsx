@@ -9,6 +9,8 @@ import UserMenu from "@/components/user-menu";
 import { useQuery } from "@tanstack/react-query";
 import { formatInTimeZone } from "date-fns-tz";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { zhTW } from "date-fns/locale";
 
 // 定義台灣時區
 const TAIWAN_TIMEZONE = "Asia/Taipei";
@@ -36,6 +38,9 @@ export default function StatsPage() {
   const isAdmin = user?.role === "admin";
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
   const [isRescueOpen, setIsRescueOpen] = useState(true);
+  
+  // 取得當前月份
+  const currentMonth = format(new Date(), "yyyy 年 M 月", { locale: zhTW });
   
   // 獲取月度活動記錄
   const { data: monthlyActivities, isLoading: activitiesLoading } = useQuery<MonthlyActivity[]>({
@@ -88,7 +93,7 @@ export default function StatsPage() {
               onClick={() => setIsActivitiesOpen(!isActivitiesOpen)}
             >
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">月度協勤統計</CardTitle>
+                <CardTitle className="text-lg">當月協勤統計 ({currentMonth})</CardTitle>
                 <ExpandIcon 
                   className={cn("text-neutral-500 transition-transform", 
                     isActivitiesOpen ? "rotate-180" : "")} 
@@ -111,10 +116,10 @@ export default function StatsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[120px]">日期</TableHead>
-                        <TableHead>簽到時間</TableHead>
-                        <TableHead>簽退時間</TableHead>
-                        <TableHead className="text-right">協勤時數</TableHead>
+                        <TableHead className="w-[100px]">日期</TableHead>
+                        <TableHead className="w-[100px]">簽到時間</TableHead>
+                        <TableHead className="w-[100px]">簽退時間</TableHead>
+                        <TableHead className="w-[100px] text-right">協勤時數</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -140,7 +145,7 @@ export default function StatsPage() {
               onClick={() => setIsRescueOpen(!isRescueOpen)}
             >
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">救護案件統計</CardTitle>
+                <CardTitle className="text-lg">當月救護案件統計 ({currentMonth})</CardTitle>
                 <ExpandIcon 
                   className={cn("text-neutral-500 transition-transform", 
                     isRescueOpen ? "rotate-180" : "")} 
@@ -165,9 +170,9 @@ export default function StatsPage() {
                       <TableRow>
                         <TableHead className="w-[100px]">日期</TableHead>
                         <TableHead className="w-[80px]">時間</TableHead>
-                        <TableHead>案件類型</TableHead>
-                        <TableHead>案件子類型</TableHead>
-                        <TableHead>基本處置</TableHead>
+                        <TableHead className="w-[120px]">案件類型</TableHead>
+                        <TableHead className="w-[120px]">案件子類型</TableHead>
+                        <TableHead className="w-[180px]">基本處置</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
