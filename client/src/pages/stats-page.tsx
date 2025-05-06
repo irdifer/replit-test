@@ -52,7 +52,7 @@ export default function StatsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const isAdmin = user?.role === "admin";
-  const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
+  const [isActivitiesOpen, setIsActivitiesOpen] = useState(false);
   const [isRescueOpen, setIsRescueOpen] = useState(false);
   const [expandedRescues, setExpandedRescues] = useState<number[]>([]);
   const isMobile = useIsMobile();
