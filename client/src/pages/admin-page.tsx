@@ -127,7 +127,7 @@ export default function AdminPage() {
   const resetForm = () => {
     setFormData({
       name: "",
-      position: "志工",
+      position: "隊員",
       isAdmin: false,
       username: "",
       notes: ""
@@ -139,7 +139,7 @@ export default function AdminPage() {
     setCurrentVolunteer(volunteer);
     setFormData({
       name: volunteer.name,
-      position: volunteer.position || "志工",
+      position: volunteer.position || "隊員",
       isAdmin: volunteer.isAdmin || false,
       username: volunteer.username || "",
       notes: volunteer.notes || ""
@@ -208,18 +208,18 @@ export default function AdminPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <UserIcon className="text-blue-500" />
-            管理志工名單
+            管理隊員名單
           </h2>
           <div className="flex gap-2">
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-[#58B2DC] hover:bg-[#4B99BD]" size="sm">
-                  新增志工
+                  新增隊員
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>新增志工</DialogTitle>
+                  <DialogTitle>新增隊員</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -296,7 +296,7 @@ export default function AdminPage() {
 
         <Card className="mb-6">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">志工管理名單</CardTitle>
+            <CardTitle className="text-lg">隊員名單</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -304,7 +304,7 @@ export default function AdminPage() {
             ) : error ? (
               <div className="text-center py-4 text-red-500">載入失敗</div>
             ) : volunteers.length === 0 ? (
-              <div className="text-center py-4 text-neutral-500">沒有志工資料</div>
+              <div className="text-center py-4 text-neutral-500">沒有隊員資料</div>
             ) : (
               <div className="relative overflow-x-auto">
                 <Table>
@@ -323,10 +323,10 @@ export default function AdminPage() {
                     {volunteers.map((volunteer) => (
                       <TableRow key={volunteer.id}>
                         <TableCell className="font-medium">{volunteer.name}</TableCell>
-                        <TableCell>{volunteer.position || "志工"}</TableCell>
+                        <TableCell>{volunteer.position || "隊員"}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isAdmin ? "bg-blue-100 text-blue-800" : "bg-neutral-100 text-neutral-800"}`}>
-                            {volunteer.isAdmin ? "管理員" : "志工"}
+                            {volunteer.isAdmin ? "管理員" : "隊員"}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -374,7 +374,7 @@ export default function AdminPage() {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>編輯志工</DialogTitle>
+              <DialogTitle>編輯隊員</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
