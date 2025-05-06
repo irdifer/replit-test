@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import * as XLSX from "xlsx";
-import { Download } from "lucide-react";
+import { Download, ChevronRight, ChevronDown } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // 定義台灣時區
 const TAIWAN_TIMEZONE = "Asia/Taipei";
@@ -40,6 +41,15 @@ export default function StatsPage() {
   const isAdmin = user?.role === "admin";
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
   const [isRescueOpen, setIsRescueOpen] = useState(true);
+  const [expandedRescues, setExpandedRescues] = useState<number[]>([]);
+  const isMobile = useIsMobile();
+  
+  // 切換救護案件詳細信息顯示
+  const toggleRescueDetails = (id: number) => {
+    setExpandedRescues(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
   
   // 取得當前月份
   const currentMonth = format(new Date(), "yyyy 年 M 月", { locale: zhTW });
@@ -259,28 +269,61 @@ export default function StatsPage() {
                     </Button>
                   </div>
                   <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">日期</TableHead>
-                          <TableHead className="w-[80px]">時間</TableHead>
-                          <TableHead className="w-[120px]">案件類型</TableHead>
-                          <TableHead className="w-[120px]">案件子類型</TableHead>
-                          <TableHead className="w-[180px]">基本處置</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
+                    {isMobile ? (
+                      <div className="divide-y divide-neutral-200">
                         {rescueList.map((rescue) => (
-                          <TableRow key={rescue.id}>
-                            <TableCell className="font-medium">{rescue.date}</TableCell>
-                            <TableCell>{rescue.time}</TableCell>
-                            <TableCell>{rescue.caseType}</TableCell>
-                            <TableCell>{rescue.caseSubtype || '-'}</TableCell>
-                            <TableCell>{rescue.treatment || '-'}</TableCell>
-                          </TableRow>
+                          <div key={rescue.id} className="overflow-hidden">
+                            <div 
+                              className="p-3 flex justify-between items-center cursor-pointer hover:bg-neutral-50"
+                              onClick={() => toggleRescueDetails(rescue.id)}
+                            >
+                              <div>
+                                <div className="font-medium">{rescue.date} {rescue.time}</div>
+                                <div className="text-sm text-neutral-600">{rescue.caseType}</div>
+                              </div>
+                              {expandedRescues.includes(rescue.id) ? 
+                                <ChevronDown className="h-5 w-5 text-neutral-400" /> : 
+                                <ChevronRight className="h-5 w-5 text-neutral-400" />}
+                            </div>
+                            {expandedRescues.includes(rescue.id) && (
+                              <div className="p-3 pt-0 pl-6 bg-neutral-50 text-sm">
+                                <div className="grid grid-cols-3 gap-2 mb-1">
+                                  <div className="font-medium">案件子類型:</div>
+                                  <div className="col-span-2">{rescue.caseSubtype || '-'}</div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="font-medium">基本處置:</div>
+                                  <div className="col-span-2">{rescue.treatment || '-'}</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         ))}
-                      </TableBody>
-                    </Table>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px]">日期</TableHead>
+                            <TableHead className="w-[80px]">時間</TableHead>
+                            <TableHead className="w-[120px]">案件類型</TableHead>
+                            <TableHead className="w-[120px]">案件子類型</TableHead>
+                            <TableHead className="w-[180px]">基本處置</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {rescueList.map((rescue) => (
+                            <TableRow key={rescue.id}>
+                              <TableCell className="font-medium">{rescue.date}</TableCell>
+                              <TableCell>{rescue.time}</TableCell>
+                              <TableCell>{rescue.caseType}</TableCell>
+                              <TableCell>{rescue.caseSubtype || '-'}</TableCell>
+                              <TableCell>{rescue.treatment || '-'}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
                   </div>
                 </div>
               )}
