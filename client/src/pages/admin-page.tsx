@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Volunteer } from "@shared/schema";
@@ -191,6 +192,16 @@ export default function AdminPage() {
   const handleSwitchChange = (checked: boolean) => {
     setFormData(prev => ({ ...prev, isAdmin: checked }));
   };
+  
+  // Team Type 選擇變更
+  const handleTeamTypeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, teamType: value }));
+  };
+  
+  // Position 變更
+  const handlePositionChange = (value: string) => {
+    setFormData(prev => ({ ...prev, position: value }));
+  };
 
   return (
     <div className="bg-neutral-50 text-neutral-800 min-h-screen pb-16 md:pb-0 overflow-auto">
@@ -250,6 +261,34 @@ export default function AdminPage() {
                       className="col-span-3"
                     />
                   </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="teamType" className="text-right">隊員類型</Label>
+                    <Select
+                      value={formData.teamType || "T1"}
+                      onValueChange={handleTeamTypeChange}
+                    >
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="選擇隊員類型" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="T1">T1</SelectItem>
+                        <SelectItem value="T2">T2</SelectItem>
+                        <SelectItem value="TP">TP</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="position" className="text-right">職位</Label>
+                    <Input
+                      id="position"
+                      name="position"
+                      value={formData.position || "隊員"}
+                      onChange={handleInputChange}
+                      className="col-span-3"
+                    />
+                  </div>
+                  
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="isAdmin" className="text-right">管理權限</Label>
                     <div className="col-span-3 flex items-center">
@@ -319,7 +358,7 @@ export default function AdminPage() {
                   <TableBody>
                     {volunteers.map((volunteer) => (
                       <TableRow key={volunteer.id}>
-                        <TableCell className="font-medium">{volunteer.name}</TableCell>
+                        <TableCell className="font-medium">{volunteer.name}-{volunteer.teamType || "T1"}-{volunteer.position || "隊員"}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 text-xs rounded-full ${volunteer.isAdmin ? "bg-blue-100 text-blue-800" : "bg-neutral-100 text-neutral-800"}`}>
                             {volunteer.isAdmin ? "管理員" : "隊員"}

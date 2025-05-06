@@ -55,7 +55,7 @@ export default function StatsPage() {
   // 切換救護案件詳細信息顯示
   const toggleRescueDetails = (id: number) => {
     setExpandedRescues(prev => 
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+      prev.includes(id) ? [] : [id] // 只允許一個案件展開，點擊後關閉所有其它展開的案件
     );
   };
   
