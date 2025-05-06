@@ -26,6 +26,9 @@ type MonthlyActivity = {
   duration: number;
   userId?: number; // 僅管理員視圖中存在
   userName?: string; // 僅管理員視圖中存在
+  isTimeError?: boolean; // 標記時間順序錯誤
+  activityId?: number; // 可用於識別特定記錄
+  activityType?: string; // 活動類型 (signin/signout/pair)
 };
 
 // 定義救護案件列表項目類型
@@ -232,11 +235,11 @@ export default function StatsPage() {
                       </TableHeader>
                       <TableBody>
                         {monthlyActivities.map((activity) => (
-                          <TableRow key={isAdmin ? `${activity.userId}-${activity.date}` : activity.date}>
+                          <TableRow key={isAdmin ? `${activity.userId}-${activity.activityId}-${activity.date}` : `${activity.activityId}-${activity.date}`}>
                             {isAdmin && <TableCell className="font-medium">{activity.userName || '-'}</TableCell>}
                             <TableCell className="font-medium">{activity.date}</TableCell>
-                            <TableCell>{activity.signInTime || '-'}</TableCell>
-                            <TableCell>{activity.signOutTime || '-'}</TableCell>
+                            <TableCell className={activity.isTimeError ? "text-red-500 font-medium" : ""}>{activity.signInTime || '-'}</TableCell>
+                            <TableCell className={activity.isTimeError ? "text-red-500 font-medium" : ""}>{activity.signOutTime || '-'}</TableCell>
                             <TableCell className="text-right">{activity.duration} 小時</TableCell>
                           </TableRow>
                         ))}
