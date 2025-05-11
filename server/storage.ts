@@ -3,6 +3,7 @@ import session from "express-session";
 import createMemoryStore from "memorystore";
 import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
+import { PgTransaction } from "drizzle-orm/pg-core";
 
 // 定義台灣時區
 const TAIWAN_TIMEZONE = "Asia/Taipei";
@@ -98,17 +99,16 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    // Ensure all required fields have values, even if null
+  async createUser(
+    insertUser: InsertUser,
+    tx: typeof db | PgTransaction = db
+  ): Promise<User> {
     const values = {
       ...insertUser,
       role: insertUser.role || "volunteer",
     };
-    
-    const [user] = await db
-      .insert(users)
-      .values(values)
-      .returning();
+  
+    const [user] = await tx.insert(users).values(values).returning();
     return user;
   }
   

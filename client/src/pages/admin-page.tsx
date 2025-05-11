@@ -25,6 +25,7 @@ interface VolunteerFormData {
   teamType: string;
   username?: string;
   notes?: string;
+  isRegistered?: boolean;
 }
 
 export default function AdminPage() {

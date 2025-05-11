@@ -6,6 +6,9 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { db } from "./db";
+import { volunteers } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 declare global {
   namespace Express {
@@ -133,6 +136,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     const existingUser = await storage.getUserByUsername(req.body.username);
+    console.log(existingUser)
     if (existingUser) {
       return res.status(400).send("用戶名已被使用");
     }
@@ -154,10 +158,29 @@ export function setupAuth(app: Express) {
     // 設置正確的角色（志工或管理員）
     const role = allowedVolunteer.isAdmin === true ? "admin" : "volunteer";
 
-    const user = await storage.createUser({
-      ...req.body,
-      role, // 使用從名單中確定的角色
-      password: await hashPassword(req.body.password),
+    // 使用 transaction 確保一致性
+    const user = await db.transaction(async (tx) => {
+      // 建立使用者
+      const newUser = await storage.createUser({
+        ...req.body,
+        role,
+        password: await hashPassword(req.body.password),
+      }, tx); // 傳入 tx 給 createUser 內部也走 transaction（你要確保支援）
+
+      // 更新志工表
+      const result = await tx
+        .update(volunteers)
+        .set({
+          username: newUser.username,
+          isRegistered: true,
+        })
+        .where(eq(volunteers.name, newUser.name));
+
+      if (result.rowCount === 0) {
+        throw new Error("無法更新志工名單，請聯絡管理員");
+      }
+
+      return newUser;
     });
 
     req.login(user, (err) => {
