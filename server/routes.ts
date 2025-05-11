@@ -153,14 +153,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     const userId = req.user!.id;
-    const { caseType, caseSubtype, treatment, hospital, rescueType, startTime, endTime, woundLength, woundHeight, woundDepth } = req.body;
+    const { caseType, caseSubtype, treatment, hospital,rescueAddress, rescueType, startTime, endTime, woundLength, woundHeight, woundDepth } = req.body;
 
     if (!caseType) {
       return res.status(400).json({ message: "Case type is required" });
     }
     
     // 記錄請求資料，便於除錯
-    console.log("Creating rescue with data:", { rescueType, caseType, caseSubtype, hospital });
+    console.log("Creating rescue with data:", { rescueType, caseType, caseSubtype, hospital,rescueAddress });
 
     const rescue = await storage.createRescue({
       userId,
@@ -168,6 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       caseSubtype,
       treatment,
       hospital,
+      rescueAddress,
       rescueType,  // 添加救護類別
       startTime,
       endTime,

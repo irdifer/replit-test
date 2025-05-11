@@ -43,6 +43,8 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
   const [woundDepth, setWoundDepth] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [rescueAddress, setRescueAddress] = useState(""); // 救護地址
+
   
   // 驗證狀態
   const [formErrors, setFormErrors] = useState<{
@@ -52,6 +54,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
     hospital?: boolean;
     rescueType?: boolean;
     time?: boolean;
+    rescueAddress?: boolean;
   }>({});
 
   // Case type mapping for subtypes
@@ -143,7 +146,8 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       treatment: !treatment.trim(),
       hospital: !hospital,
       rescueType: !rescueType,
-      time: !startTime || !endTime
+      time: !startTime || !endTime,
+      rescueAddress: !rescueAddress.trim()
     };
     
     setFormErrors(errors);
@@ -181,6 +185,7 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
       treatment,
       // 如果選擇的是其他，則使用自定義醫院名稱
       hospital: isOtherHospital ? otherHospital : hospital,
+      rescueAddress,
       rescueType,
       startTime,
       endTime,
@@ -443,6 +448,25 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
             </div>
           </div>
           
+          {/* Rescue Address */}
+          <div className="mb-4">
+            <Label htmlFor="rescueAddress" className="block text-sm font-medium text-neutral-700 mb-1">
+              救護地址 {formErrors.rescueAddress && <span className="text-red-600 ml-1">*必填</span>}
+            </Label>
+            <Input
+              id="rescueAddress"
+              type="text"
+              value={rescueAddress}
+              onChange={(e) => setRescueAddress(e.target.value)}
+              placeholder="請輸入救護地點（如：新北市板橋區...）"
+              className="w-full"
+            />
+            {formErrors.rescueAddress && (
+              <p className="text-red-600 text-sm mt-1">請輸入救護地址</p>
+            )}
+          </div>
+
+
           {/* Basic Treatment */}
           <div className="mb-4">
             <h4 className="flex items-center gap-1 font-medium mb-2">

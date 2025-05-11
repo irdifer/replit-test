@@ -40,6 +40,7 @@ type RescueListItem = {
   caseSubtype: string | null;
   treatment: string | null;
   hospital: string | null; // 新增送達醫院欄位
+  rescueAddress: string | null;
   rescueType: string | null; // ALS, BLS, PUA
   startTime: string | null; // 出勤時間
   endTime: string | null; // 返隊時間
@@ -310,6 +311,7 @@ export default function StatsPage() {
         '案件類型': rescue.caseType,
         '子類別': rescue.caseSubtype || '-',
         '送達醫院': rescue.hospital || '-',
+        '救護地址': rescue.rescueAddress || '-',
         '基本處置': rescue.treatment || '-'
       }))
     );
@@ -324,6 +326,7 @@ export default function StatsPage() {
       { wch: 15 }, // 案件類型
       { wch: 15 }, // 子類別
       { wch: 15 }, // 送達醫院
+      { wch: 100 }, // 救護地址
       { wch: 40 }  // 基本處置
     ];
     worksheet['!cols'] = wscols;
@@ -623,6 +626,10 @@ export default function StatsPage() {
                                   <div className="font-medium">送達醫院:</div>
                                   <div className="col-span-2">{rescue.hospital || '-'}</div>
                                 </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="font-medium">救護地址:</div>
+                                  <div className="col-span-2">{rescue.rescueAddress || '-'}</div>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -680,6 +687,10 @@ export default function StatsPage() {
                                       <div>
                                         <span className="font-medium">送達醫院: </span>
                                         {rescue.hospital || '-'}
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">救護地址: </span>
+                                        {rescue.rescueAddress || '-'}
                                       </div>
                                       <div className="col-span-2">
                                         <span className="font-medium">基本處置: </span>

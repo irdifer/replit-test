@@ -62,6 +62,7 @@ export const rescues = pgTable("rescues", {
   caseSubtype: text("case_subtype"),
   treatment: text("treatment"),
   hospital: text("hospital"), // 新增送達醫院欄位
+  rescueAddress: text("rescue_address").notNull(),
   rescueType: text("rescue_type"), // ALS, BLS, PUA
   timestamp: timestamp("timestamp").notNull().defaultNow(),
   // Mission times
@@ -71,6 +72,7 @@ export const rescues = pgTable("rescues", {
   woundLength: text("wound_length"),
   woundHeight: text("wound_height"),
   woundDepth: text("wound_depth"),
+
 });
 
 export const insertRescueSchema = createInsertSchema(rescues).pick({
@@ -79,6 +81,7 @@ export const insertRescueSchema = createInsertSchema(rescues).pick({
   caseSubtype: true,
   treatment: true,
   hospital: true, // 新增送達醫院欄位
+  rescueAddress: true,
   rescueType: true, // ALS, BLS, PUA
   startTime: true,
   endTime: true,

@@ -80,7 +80,7 @@ export async function syncRescuesToSheet() {
     
     // 準備表頭
     const headers = [
-      '姓名', '時間', '項目(案件類型)', '子項目(案件子類型)', '敘述(基本處置)', '送達醫院'
+      '姓名', '時間', '項目(案件類型)', '子項目(案件子類型)', '敘述(基本處置)', '送達醫院', '救護地址'
     ];
     
     // 將數據轉換為表格格式
@@ -93,6 +93,7 @@ export async function syncRescuesToSheet() {
         record.caseSubtype || '',
         record.treatment || '',
         record.hospital || '',
+        record.rescueAddress || '',
       ])
     ];
     
@@ -198,6 +199,7 @@ async function fetchRescueRecordsForSync() {
     caseSubtype: record.caseSubtype,
     treatment: record.treatment,
     hospital: record.hospital,
+    rescueAddress: record.rescueAddress,
   }));
 }
 

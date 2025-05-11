@@ -460,6 +460,7 @@ export class DatabaseStorage implements IStorage {
       caseSubtype: rescue.caseSubtype,
       treatment: rescue.treatment,
       hospital: rescue.hospital,
+      rescueAddress: rescue.rescueAddress,
       rescueType: rescue.rescueType,
       startTime: rescue.startTime,
       endTime: rescue.endTime,
@@ -483,6 +484,7 @@ export class DatabaseStorage implements IStorage {
           caseSubtype: insertRescue.caseSubtype || null,
           treatment: insertRescue.treatment || null,
           hospital: insertRescue.hospital || null,
+          rescueAddress: insertRescue.rescueAddress || '',
           rescueType: insertRescue.rescueType || null,
           startTime: insertRescue.startTime || null,
           endTime: insertRescue.endTime || null,
@@ -497,12 +499,14 @@ export class DatabaseStorage implements IStorage {
     // 如果不是測試帳號，則正常記錄救護記錄
     // 記錄執行中的參數，便於除錯
     console.log('救護類別資料：', insertRescue.rescueType);
+    console.log('救護地址資料：', insertRescue.rescueAddress);
     
     const values = {
       ...insertRescue,
       caseSubtype: insertRescue.caseSubtype || null,
       treatment: insertRescue.treatment || null,
       hospital: insertRescue.hospital || null,
+      rescueAddress: insertRescue.rescueAddress || '',
       rescueType: insertRescue.rescueType || null, // 確保救護類別有正確處理
       startTime: insertRescue.startTime || null,
       endTime: insertRescue.endTime || null,
@@ -748,6 +752,7 @@ export class DatabaseStorage implements IStorage {
       caseSubtype: rescue.caseSubtype,
       treatment: rescue.treatment,
       hospital: rescue.hospital,
+      rescueAddress: rescue.rescueAddress,
       rescueType: rescue.rescueType,
       startTime: rescue.startTime,
       endTime: rescue.endTime,

@@ -71,7 +71,7 @@ const TEST_ACCOUNTS = [
     username: "emt_3bug",
     password: "123456",
     name: "許毓庭",
-    role: "volunteer"
+    role: "admin"
   },
   {
     username: "admin",
