@@ -58,6 +58,7 @@
         <option>其他</option>
         <option>緊急救援</option>
         <option>打架受傷</option>
+        <option>未接觸</option>
       </select>
 
       <div id="subType"></div>
@@ -79,26 +80,47 @@
     // 帶入使用者
     document.getElementById("userName").textContent = localStorage.getItem("userName") || "訪客";
 
-    // 子分類選單
-    document.getElementById("caseType").addEventListener("change", function() {
-      const value = this.value;
-      const sub = document.getElementById("subType");
-      let html = "";
-      if (value === "內科") {
-        html = `<label><input type="radio" name="sub"> 急病</label>
-                <label><input type="radio" name="sub"> OHCA</label>
-                <label><input type="radio" name="sub"> overdose</label>
-                <label><input type="radio" name="sub"> 意識不清</label>`;
-      } else if (value === "外科") {
-        html = `<label><input type="radio" name="sub"> 車禍</label>
-                <label><input type="radio" name="sub"> 路倒</label>`;
-      } else if (value === "其他") {
-        html = `<label><input type="radio" name="sub"> 精神急病</label>
-                <label><input type="radio" name="sub"> 自殺</label>
-                <label><input type="radio" name="sub"> 災害救助</label>`;
-      }
-      sub.innerHTML = html;
-    });
+  // 子分類選單
+document.getElementById("caseType").addEventListener("change", function() {
+  const value = this.value;
+  const sub = document.getElementById("subType");
+  let html = "";
+
+  if (value === "內科") {
+    html = `<label><input type="radio" name="sub"> 急病</label>
+            <label><input type="radio" name="sub"> OHCA</label>
+            <label><input type="radio" name="sub"> overdose</label>
+            <label><input type="radio" name="sub"> 意識不清</label>
+            <label><input type="radio" name="sub"> 急產</label>`;
+  } else if (value === "外科") {
+    html = `<label><input type="radio" name="sub"> 車禍</label>
+            <label><input type="radio" name="sub"> 路倒</label>
+            <label><input type="radio" name="sub"> 墜落傷</label>
+            <label><input type="radio" name="sub"> 一般受傷</label>
+            <label><input type="radio" name="sub"> 刀傷</label>
+            <label><input type="radio" name="sub"> 撕裂傷</label>`;
+  } else if (value === "其他") {
+    html = `<label><input type="radio" name="sub"> 精神急病</label>
+            <label><input type="radio" name="sub"> 自殺</label>
+            <label><input type="radio" name="sub"> 災害救助</label>`;
+  } else if (value === "火警救助") {
+    html = `<label><input type="radio" name="sub"> 受困</label>
+            <label><input type="radio" name="sub"> 燒燙傷</label>
+            <label><input type="radio" name="sub"> 嗆傷</label>`;
+  } else if (value === "緊急救援") {
+    html = `<label><input type="radio" name="sub"> 山域</label>
+            <label><input type="radio" name="sub"> 水域</label>`;
+  } else if (value === "打架受傷") {
+    html = `<label><input type="radio" name="sub"> 挫傷</label>
+            <label><input type="radio" name="sub"> 割傷</label>
+            <label><input type="radio" name="sub"> 撕裂傷</label>`;
+  } else if (value === "未接觸") {
+    html = `<label><input type="radio" name="sub"> 無</label>`;
+  }
+
+  sub.innerHTML = html;
+});
+
 
     // 快速帶入文字
     function insertText(text) {
