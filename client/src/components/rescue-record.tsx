@@ -257,14 +257,54 @@ export default function RescueRecord({ onSubmit, isPending, dailyActivity }: Res
 
           {/* 基本處置 */}
           {!hiddenSections && (
-            <div className="mb-4">
-              <Label className="block text-sm font-medium mb-2">基本處置</Label>
-              <Textarea
-                className="min-h-[120px] resize-y"
-                value={treatment}
-                onChange={(e) => setTreatment(e.target.value)}
-                placeholder="請描述現場處置內容..."
-              />
+            <div>
+              <div className="mb-4">
+                <Label className="block text-sm font-medium mb-2">基本處置</Label>
+                <Textarea
+                  className="min-h-[120px] resize-y w-full"
+                  value={treatment}
+                  onChange={(e) => setTreatment(e.target.value)}
+                  placeholder="請描述現場處置內容..."
+                />
+              </div>
+
+              <div className="tags flex gap-2 flex-wrap mt-2">
+                <button 
+                  type="button"
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+                  onClick={() => setTreatment(prev => `${prev}生理監視 VS `)}
+                >
+                  生理監視 VS
+                </button>
+                <button 
+                  type="button"
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+                  onClick={() => setTreatment(prev => `${prev}心理支持 MS `)}
+                >
+                  心理支持 MS
+                </button>
+                <button 
+                  type="button"
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+                  onClick={() => setTreatment(prev => `${prev}現場待命 `)}
+                >
+                  現場待命
+                </button>
+                <button 
+                  type="button"
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+                  onClick={() => setTreatment(prev => `${prev}撕裂傷 LW `)}
+                >
+                  撕裂傷 LW
+                </button>
+                <button 
+                  type="button"
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+                  onClick={() => setTreatment(prev => `${prev}擦傷 AW `)}
+                >
+                  擦傷 AW
+                </button>
+              </div>
             </div>
           )}
 
