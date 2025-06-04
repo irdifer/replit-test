@@ -1,0 +1,14 @@
+# 不带入镜像的文件/目录
+node_modules
+npm-debug.log*
+yarn-error.log*
+dist
+.git
+.gitignore
+.env
+*.log
+coverage
+test
+tests
+.vscode
+.DS_Store
