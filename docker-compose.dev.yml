@@ -1,0 +1,54 @@
+# docker-compose.dev.yml
+#
+# 用途：在本地进行开发时，启用代码热重载（挂载 volume），
+#      并且保证 devDependencies 安装后执行 npm run dev。
+
+services:
+  db:
+    image: postgres:15
+    container_name: my-postgres-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    # 使用官方 node 做开发环境，方便挂载原始码与 devDependencies
+    image: node:18-alpine
+    container_name: my-app-dev
+    working_dir: /app
+
+    # 把本地代码挂载到 /app，node_modules 放在容器内（防止本地 node_modules 覆盖）
+    volumes:
+      - ./:/app
+      - /app/node_modules
+
+    ports:
+      - "5000:5000"
+
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://postgres:123456@db:5432/testdb
+      PUBLIC_DIR: /app/dist/public
+      UPLOAD_DIR: /app/uploads
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # 第一次挂载 volume 后，需要先 npm install，才能运行 npm run dev
+    # npm run dev 里可启动 ts-node/nodemon/tsx 等，使代码变动立即生效
+    command: sh -c "npm install && npm run dev"
+
+# 在底部定义卷，否则会报 “undefined volume” 错误
+volumes:
+  pgdata_dev:

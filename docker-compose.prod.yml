@@ -1,4 +1,4 @@
-# docker-compose.yml
+# docker-compose.prod.yml
 version: '3.8'
 
 services:
@@ -13,6 +13,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build:
@@ -21,18 +26,13 @@ services:
     container_name: my-app
     environment:
       - NODE_ENV=production
-      # 請確認以下 DATABASE_URL 與你的程式中讀取資料庫的設定相符
       - DATABASE_URL=postgres://postgres:123456@db:5432/testdb
-      - PUBLIC_DIR=/app/dist/public     # ← 確保 serveStatic 里拿到 process.env.PUBLIC_DIR 时不是 undefined
-      - UPLOAD_DIR=/app/uploads         # ← 如果代码里还会 path.resolve(process.env.UPLOAD_DIR, …)
+      - PUBLIC_DIR=/app/dist/public
+      - UPLOAD_DIR=/app/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "5000:5000"
-    # 如果你需要開發時直接看到程式碼變動，可自行啟用 volumes：
-    # volumes:
-    #   - ./:/app
-    #   - /app/node_modules
-
-volumes:
-  pgdata:
+    # 生產環境不掛載 volume，直接使用 build 完整映像
+    # command: 可不指定，因為 Dockerfile 已經有 CMD
